@@ -8,7 +8,7 @@ public class master {
 
     static List<store> myStores = new ArrayList<store>();
     
-     
+    
     public void createStore(String path) throws IOException {
         parser parser = new parser(path);
         String[] myData = parser.getStore();
