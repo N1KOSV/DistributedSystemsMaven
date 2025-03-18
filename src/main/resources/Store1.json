@@ -1,0 +1,41 @@
+{
+"StoreName": "Domino's",
+"Latitude": 38.0146, 
+"Longitude": 23.74595,
+"FoodCategory": "pizzeria",
+"Stars": 3.9,
+"NoOfVotes": 112,
+"StoreLogo": "/usr/bin/images/Dominos.png",
+"Products": [
+{
+"ProductName": "margarita",
+"ProductType": "pizza",
+"Available Amount": 5,
+"Price": 9.2
+},
+{
+"ProductName": "special",
+"ProductType": "pizza",
+"Available Amount": 10,
+"Price": 12
+},
+{
+"ProductName": "pepperoni",
+"ProductType": "pizza",
+"Available Amount": 8,
+"Price": 10
+}, 
+{
+  "ProductName": "arrabiata",
+  "ProductType": "pasta", 
+  "Available Amount": 9,
+  "Price": 8.5
+},
+{
+  "ProductName": "chef’s Salad",
+  "ProductType": "salad",
+  "Available Amount": 10,
+  "Price": 5
+}
+]
+}

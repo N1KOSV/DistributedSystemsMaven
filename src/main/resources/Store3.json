@@ -1,0 +1,35 @@
+{
+"StoreName": "Crepa crepa",
+"Latitude": 38.02233, 
+"Longitude": 23.7479,
+"FoodCategory": "creperie",
+"Stars": 3,
+"NoOfVotes": 158,
+"StoreLogo": "/usr/bin/images/crepaCrepa.png",
+"Products": [
+{
+"ProductName": "sweet crepe",
+"ProductType": "crepe",
+"Available Amount": 40,
+"Price": 8
+},
+{
+"ProductName": "savory crepe",
+"ProductType": "crepe",
+"Available Amount": 50,
+"Price": 9
+},
+{
+"ProductName": "chocolate waffle",
+"ProductType": "waffle",
+"Available Amount": 10,
+"Price": 10
+},
+{
+  "ProductName": "ice cream waffle",
+  "ProductType": "waffle",
+  "Available Amount": 12,
+  "Price": 11
+}
+]
+}

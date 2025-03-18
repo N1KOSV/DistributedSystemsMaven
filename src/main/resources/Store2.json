@@ -1,0 +1,35 @@
+{
+"StoreName": "Vasiliki",
+"Latitude": 38.01701,
+"Longitude": 23.74095,
+"FoodCategory": "souvlatzidiko",
+"Stars": 4.8,
+"NoOfVotes": 203,
+"StoreLogo": "/usr/bin/images/Vasiliki.png",
+"Products": [
+{
+"ProductName": "pork gyros",
+"ProductType": "souvlaki",
+"Available Amount": 18,
+"Price": 3
+},
+{
+"ProductName": "chicken gyros",
+"ProductType": "souvlaki",
+"Available Amount": 24,
+"Price": 3
+},
+{
+"ProductName": "pork kalamaki",
+"ProductType": "kalamaki",
+"Available Amount": 20,
+"Price": 2
+}, 
+{
+  "ProductName": "chicken kalamaki",
+  "ProductType": "kalamaki",
+  "Available Amount": 30, 
+  "Price": 2
+}
+]
+}
