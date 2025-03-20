@@ -14,6 +14,10 @@ public class product {
         this.amount = amount;
         this.price = price;
     }
+    
+    public void sell(){
+        amount -= 1;
+    }
 
     public Double getPrice() {return price;}
 

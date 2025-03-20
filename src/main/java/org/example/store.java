@@ -13,8 +13,9 @@ public class store{
     private int votes;
     private String logo;
     private List<product> products;
+    protected int storeID;
 
-    public store(String name, Double latitude, Double longitude, String foodCategory, Double stars, int votes, String logo) {
+    public store(String name, Double latitude, Double longitude, String foodCategory, Double stars, int votes, String logo, int storeID) {
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -23,13 +24,16 @@ public class store{
         this.votes = votes;
         this.logo = logo;
         this.products = new ArrayList<>();
+        this.storeID = storeID;
     }
 
     public void addProduct(String name, String type, int amount ,Double price){
         products.add(new product(name,type,amount,price));
     }
 
-    public void addProduct(product p){products.add(p);}
+    public void addProduct(product p){
+        products.add(p);
+    }
 
     public List<product> getProducts() {
         return products;
@@ -58,6 +62,16 @@ public class store{
         return distance <= 5;
     }
     
-    
-    
+    public void sell(String p){
+        for (product product : products) {
+            if (product.getName().equals(p)){
+                System.out.println(product.getPrice());
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return   name  + ": " + foodCategory + " ( " + getAvgPrice() + " ) rating: " + stars + "/5 (" + votes + ") ";
+    }
 }
