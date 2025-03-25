@@ -5,14 +5,14 @@ import java.util.*;
 
 public class store{
 
-    private String name;
+    protected String name;
     private Double latitude;
     private Double longitude;
     protected String foodCategory;
     private Double stars;
     private int votes;
     private String logo;
-    private List<product> products;
+    protected List<product> products;
     protected int storeID;
 
     public store(String name, Double latitude, Double longitude, String foodCategory, Double stars, int votes, String logo, int storeID) {
@@ -33,6 +33,10 @@ public class store{
 
     public void addProduct(product p){
         products.add(p);
+    }
+
+    public int getStoreID() {
+        return storeID;
     }
 
     public List<product> getProducts() {

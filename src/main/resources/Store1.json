@@ -10,13 +10,13 @@
 {
 "ProductName": "margarita",
 "ProductType": "pizza",
-"Available Amount": 5,
+"Available Amount": 10,
 "Price": 9.2
 },
 {
 "ProductName": "special",
 "ProductType": "pizza",
-"Available Amount": 10,
+"Available Amount": 22,
 "Price": 12
 },
 {
