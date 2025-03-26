@@ -1,0 +1,17 @@
+{
+"StoreName":"Magazi",
+"Latitude":22.29292,
+"Longitude":22.8884,
+"FoodCategory":"Pizza",
+"Stars":3.0,
+"NoOfVotes":221,
+"StoreLogo":"f",
+"Products": [
+{
+"ProductName":"aaaaa",
+"Price":3.6,
+"ProductType":"rrrr",
+"Available Amount":3
+}
+]
+}

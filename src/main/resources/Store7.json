@@ -1,29 +1,35 @@
 {
-"StoreName": "storeName",
-"Latitude": 37.9932963,
-"Longitude": 23.733413,
-"FoodCategory": "pizzeria",
-"Stars": 3,
-"NoOfVotes": 15,
-"StoreLogo": "/usr/bin/images/storeLogo.png",
+"StoreName": "I love souvlaki",
+"Latitude": 38.003724,
+"Longitude": 23.879944,
+"FoodCategory": "souvlatzidiko",
+"Stars": 4.4,
+"NoOfVotes": 147,
+"StoreLogo": "/usr/bin/images/I_love_souvlaki.png",
 "Products": [
 {
-"ProductName": "margarita",
-"ProductType": "pizza",
-"Available Amount": 5000,
-"Price": 9.2
-},
-{
-"ProductName": "special",
-"ProductType": "pizza",
-"Available Amount": 1000,
-"Price": 12
-},
-{
-"ProductName": "chef’s Salad",
+"ProductName": "I love souvlaki",
 "ProductType": "salad",
+"Available Amount": 50,
+"Price": 5.6
+},
+{
+"ProductName": "kempap",
+"ProductType": "piece",
 "Available Amount": 100,
-"Price": 5
-}
+"Price": 2.5
+},
+{
+"ProductName": "wraped pork",
+"ProductType": "souvlaki",
+"Available Amount": 150,
+"Price": 4
+},
+{
+"ProductName": "wraped chicken",
+"ProductType": "souvlaki",
+"Available Amount": 110,
+"Price": 4.5
+    }
 ]
 }
