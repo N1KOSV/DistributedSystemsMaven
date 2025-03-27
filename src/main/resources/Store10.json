@@ -1,29 +1,30 @@
+
 {
-"StoreName": "storeName",
-"Latitude": 37.9932963,
-"Longitude": 23.733413,
-"FoodCategory": "pizzeria",
-"Stars": 3,
-"NoOfVotes": 15,
-"StoreLogo": "/usr/bin/images/storeLogo.png",
-"Products": [
-{
-"ProductName": "margarita",
-"ProductType": "pizza",
-"Available Amount": 5000,
-"Price": 9.2
-},
-{
-"ProductName": "special",
-"ProductType": "pizza",
-"Available Amount": 1000,
-"Price": 12
-},
-{
-"ProductName": "chef’s Salad",
-"ProductType": "salad",
-"Available Amount": 100,
-"Price": 5
-}
-]
+    "StoreName": "FGK",
+    "Latitude": 38.042805,
+    "Longitude": 23.682944,
+    "FoodCategory": "burgers",
+    "Stars": 4.7,
+   "NoOfVotes": 352,
+    "StoreLogo": "/usr/bin/images/FGK.png",
+   "Products": [
+   {
+    "ProductName": "chicken burger",
+   "ProductType": "burger",
+   "Available Amount": 80,
+    "Price": 7.5
+   },
+   {
+    "ProductName": "double smash cheeseburger",
+   "ProductType": "burger",
+   "Available Amount": 90,
+    "Price": 6,8
+   },
+   {
+    "ProductName": "village hot dog",
+   "ProductType": "salad",
+   "Available Amount": 70,
+    "Price": 6.5
+   }
+    ]
 }
