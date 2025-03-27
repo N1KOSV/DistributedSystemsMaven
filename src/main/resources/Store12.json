@@ -1,29 +1,30 @@
+
 {
-"StoreName": "storeName",
-"Latitude": 37.9932963,
-"Longitude": 23.733413,
-"FoodCategory": "pizzeria",
-"Stars": 3,
-"NoOfVotes": 15,
-"StoreLogo": "/usr/bin/images/storeLogo.png",
-"Products": [
-{
-"ProductName": "margarita",
-"ProductType": "pizza",
-"Available Amount": 5000,
-"Price": 9.2
-},
-{
-"ProductName": "special",
-"ProductType": "pizza",
-"Available Amount": 1000,
-"Price": 12
-},
-{
-"ProductName": "chef’s Salad",
-"ProductType": "salad",
-"Available Amount": 100,
-"Price": 5
-}
-]
+    "StoreName": "Psitolixoudies",
+    "Latitude": 38.045056,
+    "Longitude": 23.678278,
+    "FoodCategory": "souvlatzidiko",
+    "Stars": 4.6,
+   "NoOfVotes": 313,
+    "StoreLogo": "/usr/bin/images/psitoli.png",
+   "Products": [
+   {
+    "ProductName": "gyros pork wrap",
+   "ProductType": "souvlaki",
+   "Available Amount": 500,
+    "Price": 3.4
+   },
+   {
+    "ProductName": "gyros chicken wrap ",
+   "ProductType": "souvlaki",
+   "Available Amount": 400,
+    "Price": 3.4
+   },
+   {
+    "ProductName": "greek Salad",
+   "ProductType": "salad",
+   "Available Amount": 100,
+    "Price": 7
+   }
+    ]
 }
