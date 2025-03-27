@@ -1,29 +1,30 @@
+
 {
-"StoreName": "storeName",
-"Latitude": 37.9932963,
-"Longitude": 23.733413,
-"FoodCategory": "pizzeria",
-"Stars": 3,
-"NoOfVotes": 15,
-"StoreLogo": "/usr/bin/images/storeLogo.png",
-"Products": [
-{
-"ProductName": "margarita",
-"ProductType": "pizza",
-"Available Amount": 5000,
-"Price": 9.2
-},
-{
-"ProductName": "special",
-"ProductType": "pizza",
-"Available Amount": 1000,
-"Price": 12
-},
-{
-"ProductName": "chef’s Salad",
-"ProductType": "salad",
-"Available Amount": 100,
-"Price": 5
-}
-]
+    "StoreName": "Oti prepei",
+    "Latitude": 38.041722,
+    "Longitude": 23.685306,
+    "FoodCategory": "creperie",
+    "Stars": 4.2,
+   "NoOfVotes": 1405,
+    "StoreLogo": "/usr/bin/images/otiprepei.png",
+   "Products": [
+   {
+    "ProductName": "crepe chockolate biscuit",
+   "ProductType": "sweet crepe",
+   "Available Amount": 220,
+    "Price": 5
+   },
+   {
+    "ProductName": "chicken tomato cheese crepe",
+   "ProductType": "sour crepe",
+   "Available Amount": 150,
+    "Price": 5.4
+   },
+   {
+    "ProductName": "Ceasar’s Salad",
+   "ProductType": "salad",
+   "Available Amount": 100,
+    "Price": 7,3
+   }
+    ]
 }
