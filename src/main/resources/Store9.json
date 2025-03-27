@@ -1,29 +1,29 @@
 {
-"StoreName": "storeName",
-"Latitude": 37.9932963,
-"Longitude": 23.733413,
-"FoodCategory": "pizzeria",
-"Stars": 3,
-"NoOfVotes": 15,
-"StoreLogo": "/usr/bin/images/storeLogo.png",
-"Products": [
-{
-"ProductName": "margarita",
-"ProductType": "pizza",
-"Available Amount": 5000,
-"Price": 9.2
-},
-{
-"ProductName": "special",
-"ProductType": "pizza",
-"Available Amount": 1000,
-"Price": 12
-},
-{
-"ProductName": "chef’s Salad",
-"ProductType": "salad",
-"Available Amount": 100,
-"Price": 5
-}
-]
+    "StoreName": "Cosmos Pizza",
+    "Latitude": 38.040000,
+    "Longitude": 23.690250,
+    "FoodCategory": "pizzeria",
+    "Stars": 4.4,
+   "NoOfVotes": 187,
+    "StoreLogo": "/usr/bin/images/cosmos-pizza.png",
+   "Products": [
+   {
+    "ProductName": "margarita",
+   "ProductType": "pizza",
+   "Available Amount": 120,
+    "Price": 5,8
+   },
+   {
+    "ProductName": "special",
+   "ProductType": "pizza",
+   "Available Amount": 100,
+    "Price": 7,5
+   },
+   {
+    "ProductName": "chef’s Salad",
+   "ProductType": "salad",
+   "Available Amount": 30,
+    "Price": 7
+   }
+    ]
 }
