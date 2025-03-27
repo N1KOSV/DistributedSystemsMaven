@@ -1,6 +1,8 @@
 package org.example;
 
 import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.sql.SQLOutput;
 import java.util.*;
@@ -50,6 +52,34 @@ public class master {
     }
 
     
+
+
+    ServerSocket providerSocket;
+	Socket connection = null;
+	
+	void openServer() {
+		try {
+			providerSocket = new ServerSocket(10010);
+
+			while (true) {
+				connection = providerSocket.accept();
+
+				Thread t = new client(connection);
+				t.start();
+
+			}
+		} catch (IOException ioException) {
+			ioException.printStackTrace();
+		} finally {
+			try {
+				providerSocket.close();
+			} catch (IOException ioException) {
+				ioException.printStackTrace();
+			}
+		}
+	}
+
+
 
     public void newStore(Scanner scanner) throws IOException {
         System.out.println("Enter the name of the store");
@@ -103,7 +133,8 @@ public class master {
     //Επιστροφή καταστημάτων στον χρήστη βάσει της τοποθεσίας του
 
     public static void main(String[] args) throws IOException {
-
+        System.out.println("Enter the name odf the store");
+        new master().openServer();
         master JJJ = new master();
         JJJ.refresh("src/main/resources");
         System.out.println(myStores.get(0).isWithin5km(38.01,23.74));
