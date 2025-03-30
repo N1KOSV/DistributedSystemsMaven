@@ -52,6 +52,11 @@ public class store{
         else if (sum/products.size() < 10){return "$$";}
         return "$$$";
     }
+    
+    public int getTotalSales(){
+            int sales = 0;
+            for (product product : products) sales += product.getSales();
+         return sales;}
 
     public boolean isWithin5km(double lat, double lon) {
         final int R = 6371; // Radius of the earth in km
@@ -66,16 +71,20 @@ public class store{
         return distance <= 5;
     }
     
-    public void sell(String p){
-        for (product product : products) {
-            if (product.getName().equals(p)){
-                System.out.println(product.getPrice());
-            }
+    public void printProducts(){
+        int i = 0;
+        for (product p : products) {
+            i++;
+            System.out.println(i + ". " + p.getName() + " " + p.getType() +" ("+ p.getPrice() + " € )");
         }
     }
+    
+    public void sell(int p){
+        products.get(p).sell();
+        }
 
     @Override
     public String toString() {
-        return   name  + ": " + foodCategory + " ( " + getAvgPrice() + " ) rating: " + stars + "/5 (" + votes + ") ";
+        return   name  + ": " + foodCategory + " ( " + getAvgPrice() + " ) rating: " + stars + "/5 (" + votes + ") " + "total sales: " + getTotalSales();
     }
 }

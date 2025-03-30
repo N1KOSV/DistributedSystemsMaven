@@ -7,17 +7,22 @@ public class product {
     private String type;
     private int amount;
     private Double price;
+    private int sales;
     
     public product(String name, String type, int amount , Double price) {
         this.name = name;
         this.type = type;
         this.amount = amount;
         this.price = price;
+        sales = 0;
     }
     
     public void sell(){
         amount -= 1;
+        sales += 1;
     }
+    
+    public int getSales() {return sales;}
 
     public Double getPrice() {return price;}
 
@@ -26,4 +31,10 @@ public class product {
     public String getType() {return type;}
 
     public int getAmount() {return amount;}
+    
+    public void setAmount(int newAmm) {amount =  newAmm;}
+    
+    public String toString() {
+        return name + ": " + type + " " + price + " € " + " (" + amount + " available units) " ;
+    }
 }
