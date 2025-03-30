@@ -12,7 +12,7 @@ public class master {
 
     static List<store> myStores = new ArrayList<store>();
 
-    public void read(String path) throws IOException {
+    public static void read(String path) throws IOException {
         File folder = new File(path);
         if (folder.exists() && folder.isDirectory()) {
             File[] files = folder.listFiles((dir, name) -> name.startsWith("Store") && name.endsWith(".json"));
@@ -73,6 +73,53 @@ public class master {
 			}
 		}
 	}
+    
+    public void editStore() {
+        Scanner scanner = new Scanner(System.in);
+        int i = 1;
+        myStores.sort(Comparator.comparingInt(store::getStoreID));
+        for (store store : myStores) {System.out.println(i + ". " + store.name);i++;}
+        System.out.println("Which store would you like to edit?");
+        int answer = Integer.parseInt(scanner.nextLine());
+        //parser parser = new parser("src/main/resources/Store"+answer+".json");
+        System.out.println("What do you want to edit?");System.out.println("1. Add a new product");System.out.println("2. Edit a product quantity");
+        int answer2 = Integer.parseInt(scanner.nextLine());
+        if (answer2 == 1) {
+            System.out.println("Enter the product name");String productName = scanner.nextLine();System.out.println("Enter the product type");String productType = scanner.nextLine();System.out.println("Enter the product price");String productPrice = scanner.nextLine();System.out.println("Enter the product amount");String productAmount = scanner.nextLine();
+            myStores.get(answer - 1).addProduct(productName,productType,Integer.parseInt(productAmount),Double.parseDouble(productPrice));}
+        //parser.addProductJson(new String[] {productName, productType, productPrice, productAmount});}
+        else{
+            for (product product : myStores.get(answer - 1).getProducts()) System.out.println(product.getName());
+            answer2 = Integer.parseInt(scanner.nextLine());
+            System.out.println("How much of this item is in stock?");
+            int answer3 = Integer.parseInt(scanner.nextLine());
+            myStores.get(answer - 1).products.get(answer2-1).setAmount(answer3);}
+        //parser.changeAvailableAmount("src/main/resources/Store" + answer + ".json", myStores.get(answer - 1).products.get(answer2 - 1).getName(), answer3); }
+    }
+    
+    public void sell() {
+        Scanner scanner = new Scanner(System.in);
+        int i = 1;
+        myStores.sort(Comparator.comparingInt(store::getStoreID));
+        for (store store : myStores) {
+            System.out.println(i + ". " + store.name);
+            i++;
+        }
+        System.out.println("Which store would you like to edit?");
+        int answer = Integer.parseInt(scanner.nextLine());
+        i = 0;
+        for (product product : myStores.get(answer - 1).getProducts()) {
+            i++;
+            System.out.println(i + ". " + product.getName());
+        }
+        int answer2 = Integer.parseInt(scanner.nextLine());
+        myStores.get(answer - 1).sell(answer2 - 1);
+        i = 0;
+        for (store store : myStores) {
+            System.out.println(i + ". " + myStores.get(i).toString());
+            i++;
+        }
+    }
 
 
 
@@ -139,53 +186,21 @@ public class master {
     // Κάποια λίστα στο Client.java ώστε να μπορώ να κρατάω κάθε πώληση ως kvp
     // ΝΔ πώς θα χρησιμοποιήσω mapReduce και για τί KVPs
     
+    public void seeAvailableStores() {
+        int i = 0;for (store store : myStores){
+            i++;
+        System.out.println(i + ". " + myStores.get(i-1).toString());
+
+        }
+    }
+    
 
     public static void main(String[] args) throws IOException {
         //System.out.println("Enter the name odf the store");
         //new master().openServer();
         master JJJ = new master();
         JJJ.read("src/main/resources");
-        System.out.println(myStores.get(0).isWithin5km(38.01,23.74));
+        System.out.println(myStores.get(0).isWithin5km(38.01, 23.74));
 
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.print("What would you like to do?\n");System.out.print("1. See all the available stores\n");System.out.print("2. Add a new store\n");System.out.print("3. Edit a store\n");System.out.print("4. Mark a sale\n");
-        int choice = Integer.parseInt(scanner.nextLine());
-        if (choice == 1) {int i = 0;for (store store : myStores) {System.out.println(i + ". " + myStores.get(i).toString());i++;}}
-        else if (choice == 2) {JJJ.newStore(scanner);}
-        else if (choice == 3) {
-            int i = 1;
-            myStores.sort(Comparator.comparingInt(store::getStoreID));
-            for (store store : myStores) {System.out.println(i + ". " + store.name);i++;}
-            System.out.println("Which store would you like to edit?");
-            int answer = Integer.parseInt(scanner.nextLine());
-            //parser parser = new parser("src/main/resources/Store"+answer+".json");
-            System.out.println("What do you want to edit?");System.out.println("1. Add a new product");System.out.println("2. Edit a product quantity");
-            int answer2 = Integer.parseInt(scanner.nextLine());
-            if (answer2 == 1) {
-                System.out.println("Enter the product name");String productName = scanner.nextLine();System.out.println("Enter the product type");String productType = scanner.nextLine();System.out.println("Enter the product price");String productPrice = scanner.nextLine();System.out.println("Enter the product amount");String productAmount = scanner.nextLine();
-                myStores.get(answer - 1).addProduct(productName,productType,Integer.parseInt(productAmount),Double.parseDouble(productPrice));}
-                //parser.addProductJson(new String[] {productName, productType, productPrice, productAmount});}
-            else{
-                for (product product : myStores.get(answer - 1).getProducts()) System.out.println(product.getName());
-                    answer2 = Integer.parseInt(scanner.nextLine());
-                    System.out.println("How much of this item is in stock?");
-                    int answer3 = Integer.parseInt(scanner.nextLine());
-                    myStores.get(answer - 1).products.get(answer2-1).setAmount(answer3);}
-                    //parser.changeAvailableAmount("src/main/resources/Store" + answer + ".json", myStores.get(answer - 1).products.get(answer2 - 1).getName(), answer3); }
-        }
-        else if (choice == 4) {
-            int i = 1;
-            myStores.sort(Comparator.comparingInt(store::getStoreID));
-            for (store store : myStores) {System.out.println(i + ". " + store.name); i++;}
-            System.out.println("Which store would you like to edit?");
-            int answer = Integer.parseInt(scanner.nextLine());
-            i = 0;
-            for (product product : myStores.get(answer - 1).getProducts()) {i++;System.out.println(i + ". " + product.getName());}
-            int answer2 = Integer.parseInt(scanner.nextLine());
-            myStores.get(answer - 1).sell(answer2 - 1);
-            i = 0;
-            for (store store : myStores) {System.out.println(i + ". " + myStores.get(i).toString());i++;}
-        }
     }
 }
