@@ -45,32 +45,27 @@ public class master {
     }
 
     
-
-
     ServerSocket providerSocket;
-	Socket connection = null;
-	
-	void openServer() {
-		try {
-			providerSocket = new ServerSocket(10010);
+    Socket connection = null;
 
-			while (true) {
-				connection = providerSocket.accept();
+    void openServer() {
+        try {
+            int port = 50000;
+            providerSocket = new ServerSocket(port, 10);
+            System.out.println("Server is listening on " + providerSocket.getLocalPort() + " port");
 
-				Thread t = new customer(connection);
-				t.start();
+            while (true) {
+                connection = providerSocket.accept();
+                System.out.println("Client connected " + connection.getInetAddress());
 
-			}
-		} catch (IOException ioException) {
-			ioException.printStackTrace();
-		} finally {
-			try {
-				providerSocket.close();
-			} catch (IOException ioException) {
-				ioException.printStackTrace();
-			}
-		}
-	}
+                Thread t = new client(connection);
+                t.start();
+
+            }
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
     
     public void editStore() {
         Scanner scanner = new Scanner(System.in);
@@ -191,7 +186,7 @@ public class master {
 
         }
     }
-    
+
 
     public static void main(String[] args) throws IOException {
         //System.out.println("Enter the name odf the store");

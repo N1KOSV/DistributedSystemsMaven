@@ -59,9 +59,14 @@ public class customer extends Thread{
 	public static void main(String[] args) throws IOException {
 		Master.read("src/main/resources");
 
-
+		
 		Scanner scanner = new Scanner(System.in);
-
+		System.out.println("Enter your latitude: ");
+		double latitude = scanner.nextDouble();
+		System.out.println("Enter your longitude: ");
+		double longitude = scanner.nextDouble();
+		customer currentCustomer = new customer(longitude, latitude);
+		
 		System.out.print("What would you like to do?\n");
 		System.out.print("1. See all the available stores\n");
 		System.out.print("2. Add a new store\n");
