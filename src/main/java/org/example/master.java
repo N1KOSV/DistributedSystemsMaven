@@ -3,8 +3,6 @@ package org.example;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.sql.SQLOutput;
 import java.util.*;
 
 public class master {
@@ -59,7 +57,7 @@ public class master {
 			while (true) {
 				connection = providerSocket.accept();
 
-				Thread t = new client(connection);
+				Thread t = new customer(connection);
 				t.start();
 
 			}

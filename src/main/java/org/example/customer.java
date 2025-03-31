@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class  client extends Thread{
+public class customer extends Thread{
     
     double latitude;
     double longitude;
@@ -17,14 +17,14 @@ public class  client extends Thread{
 	ObjectOutputStream out;
     
     
-    public client(double longitude, double latitude) {
+    public customer(double longitude, double latitude) {
         this.longitude = longitude;
         this.latitude = latitude;
         nrUsers++;
         userId = nrUsers;
     }
 
-	public client(Socket connection) {
+	public customer(Socket connection) {
 		try {
 			out = new ObjectOutputStream(connection.getOutputStream());
 			in = new ObjectInputStream(connection.getInputStream());
