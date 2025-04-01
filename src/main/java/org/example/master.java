@@ -75,18 +75,27 @@ public class master {
         System.out.println("Which store would you like to edit?");
         int answer = Integer.parseInt(scanner.nextLine());
         //parser parser = new parser("src/main/resources/Store"+answer+".json");
-        System.out.println("What do you want to edit?");System.out.println("1. Add a new product");System.out.println("2. Edit a product quantity");
+        System.out.println("What do you want to edit?");System.out.println("1. Add a new product");System.out.println("2. Edit a product quantity");System.out.println("3. Remove a product");
         int answer2 = Integer.parseInt(scanner.nextLine());
         if (answer2 == 1) {
             System.out.println("Enter the product name");String productName = scanner.nextLine();System.out.println("Enter the product type");String productType = scanner.nextLine();System.out.println("Enter the product price");String productPrice = scanner.nextLine();System.out.println("Enter the product amount");String productAmount = scanner.nextLine();
             myStores.get(answer - 1).addProduct(productName,productType,Integer.parseInt(productAmount),Double.parseDouble(productPrice));}
         //parser.addProductJson(new String[] {productName, productType, productPrice, productAmount});}
-        else{
+        else if (answer2 == 2) {
             for (product product : myStores.get(answer - 1).getProducts()) System.out.println(product.getName());
             answer2 = Integer.parseInt(scanner.nextLine());
             System.out.println("How much of this item is in stock?");
             int answer3 = Integer.parseInt(scanner.nextLine());
             myStores.get(answer - 1).products.get(answer2-1).setAmount(answer3);}
+        else if (answer2 == 3) {
+            i = 0;
+            for (product product : myStores.get(answer - 1).getProducts()) {
+                i++;
+                System.out.println(i + ". " + product.getName());
+            }
+            answer2 = Integer.parseInt(scanner.nextLine());
+            myStores.get(answer - 1).products.get(answer2 - 1).setAmount(-1);
+        }
         //parser.changeAvailableAmount("src/main/resources/Store" + answer + ".json", myStores.get(answer - 1).products.get(answer2 - 1).getName(), answer3); }
     }
     
@@ -179,11 +188,26 @@ public class master {
     // Κάποια λίστα στο Client.java ώστε να μπορώ να κρατάω κάθε πώληση ως kvp
     // ΝΔ πώς θα χρησιμοποιήσω mapReduce και για τί KVPs
     
-    public void seeAvailableStores() {
+    public void seeAllAvailableStores() {
         int i = 0;for (store store : myStores){
             i++;
         System.out.println(i + ". " + myStores.get(i-1).toString());
+        }
+    }
 
+    public static Set<String> getStoreCategories() {
+        Set<String> categories = new HashSet<>();
+        for (store store : myStores) {
+            categories.add(store.foodCategory);
+        }
+        return categories;
+    }
+
+    public void seeAvailableStores(double lon, double lat) {
+        double x = lon - lat;
+        int i = 0;for (store store : myStores){
+            i++;
+            System.out.println(i + ". " + myStores.get(i-1).toString());
         }
     }
 
@@ -193,7 +217,7 @@ public class master {
         //new master().openServer();
         master JJJ = new master();
         JJJ.read("src/main/resources");
-        System.out.println(myStores.get(0).isWithin5km(38.01, 23.74));
+        
 
     }
 }
