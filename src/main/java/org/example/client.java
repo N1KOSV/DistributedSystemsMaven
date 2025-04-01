@@ -1,86 +1,66 @@
 package org.example;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class  client extends Thread{
+public class client extends Thread {
+    private Socket socket;
+    private int a;
+    private int b;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
 
-    double latitude;
-    double longitude;
-    int userId;
-    static int nrUsers;
-
-    ObjectInputStream in;
-    ObjectOutputStream out;
-    private boolean Alive = false;
-    Socket socket;
-
-    public client(Socket socket){
+    public client(Socket socket) {
         this.socket = socket;
     }
 
-
-    public client(double longitude, double latitude) {
-        this.longitude = longitude;
-        this.latitude = latitude;
-        nrUsers++;
-        userId = nrUsers;
+    public client(int a, int b) {
+        this.a = a;
+        this.b = b;
     }
 
-    // public client(Socket connection) {
-    // 	try {
-    // 		out = new ObjectOutputStream(connection.getOutputStream());
-    // 		in = new ObjectInputStream(connection.getInputStream());
-    // 	} catch (IOException e) {
-    // 		e.printStackTrace();
-    // 	}
-    // }
     public void run() {
-        Socket requestSocket = null;
-        ObjectOutputStream out = null;
-        ObjectInputStream in = null;
-        int port = 50000;
+        try {
+            int port = 5000;
+            socket = new Socket("localhost", port);
+            //System.out.println("Connected with the server on port " + port);
 
-        try{
+            out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
 
-            requestSocket = new Socket("127.0.0.1",port);
-            System.out.println("Connected with the server in port "+ port);
-
-            out = new ObjectOutputStream(requestSocket.getOutputStream());
-            in = new ObjectInputStream(requestSocket.getInputStream());
-
-
-            out.writeObject(socket);
+            int sum = a + b;
+            out.writeObject(sum);
             out.flush();
-            Socket res = (Socket) in.readObject();
-            System.out.println("Server> ");
-        }catch (UnknownHostException unknownHost) {
+            System.out.println("Sent to the server: " + sum);
+
+            Object response = in.readObject();
+            System.out.println("Received from the server: " + response);
+
+        } catch (UnknownHostException unknownHost) {
             System.err.println("You are trying to connect to an unknown host!");
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
             try {
-                in.close();	out.close();
-                requestSocket.close();
+                if (out != null) {
+                    out.close();
+                }
+                if (socket != null) {
+                    socket.close();
+                }
+                if (in != null) {
+                    in.close();
+                }
             } catch (IOException ioException) {
                 ioException.printStackTrace();
             }
         }
-
     }
 
-    public void searchStores(){
-        //Επιστρέφει array με μαγαζιά κοντά στις συντεταγμένες του πελάτη
-    }
-
-    public static void main(String[] args) {
-        client c = new client(38, 23);
-        c.start();
+    public static void main(String[] args) throws IOException {
+        for (int a = 0; a < 5; a++) {
+            new client(a, a*2).start();
+        }
     }
 }

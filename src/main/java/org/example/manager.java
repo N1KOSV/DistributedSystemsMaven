@@ -22,7 +22,7 @@ public class manager {
 
         int choice = Integer.parseInt(scanner.nextLine());
         while (choice != 5) {
-        if (choice == 1) {Master.seeAvailableStores();}
+        if (choice == 1) {Master.seeAllAvailableStores();}
         else if (choice == 2) {Master.newStore(scanner);}
         else if (choice == 3) {Master.editStore();}
         else if (choice == 4) {Master.sell();}

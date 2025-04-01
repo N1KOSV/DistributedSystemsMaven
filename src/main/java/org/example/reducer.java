@@ -1,11 +1,19 @@
+package org.example;
+
 public class reducer {
-    boolean alive = false;
-    
-    public void setAlive(boolean alive) {
-        this.alive = alive;
+    private ReducerServer reducerServer;
+    public reducer() {}
+    public reducer(int port) {
+        reducerServer = new ReducerServer(port);
     }
-    
-    public boolean getAlive(boolean alive) {
-        return this.alive;
+    public void start() {
+        reducerServer.openServer();
+    }
+
+    public static void main(String[] args) {
+        reducer reducerServer = new reducer(6000);
+        reducerServer.start();
+
+
     }
 }
