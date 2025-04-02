@@ -24,6 +24,35 @@ public class customer extends Thread{
         userId = nrUsers;
     }
 
+/*	public customer(Socket connection) {
+		try {
+			out = new ObjectOutputStream(connection.getOutputStream());
+			in = new ObjectInputStream(connection.getInputStream());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }*/
+    
+    public void run() {
+		try {		
+			worker t =  (worker)in.readObject();
+			t.setAlive(true);
+			out.writeObject(t);
+			out.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			try {
+				in.close();
+				out.close();
+			} catch (IOException ioException) {
+				ioException.printStackTrace();
+			}
+		}
+	}
 
 	static master Master = new master();
 

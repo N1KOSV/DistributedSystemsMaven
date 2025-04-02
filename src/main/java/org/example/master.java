@@ -59,7 +59,7 @@ public class master {
         System.out.println("Which store would you like to edit?");
         int answer = Integer.parseInt(scanner.nextLine());
         //parser parser = new parser("src/main/resources/Store"+answer+".json");
-        System.out.println("What do you want to edit?");System.out.println("1. Add a new product");System.out.println("2. Edit a product quantity");System.out.println("3. Remove a product");
+        System.out.println("What do you want to edit?");System.out.println("1. Add a new product");System.out.println("2. Edit a product quantity");
         int answer2 = Integer.parseInt(scanner.nextLine());
         if (answer2 == 1) {
             System.out.println("Enter the product name");String productName = scanner.nextLine();System.out.println("Enter the product type");String productType = scanner.nextLine();System.out.println("Enter the product price");String productPrice = scanner.nextLine();System.out.println("Enter the product amount");String productAmount = scanner.nextLine();
@@ -181,6 +181,19 @@ public class master {
         Set<String> categories = new HashSet<>();
         for (store store : myStores) {
             categories.add(store.foodCategory);
+    public static Set<String> getStoreCategories() {
+        Set<String> categories = new HashSet<>();
+        for (store store : myStores) {
+            categories.add(store.foodCategory);
+        }
+        return categories;
+    }
+
+    public void seeAvailableStores(double lon, double lat) {
+        double x = lon - lat;
+        int i = 0;for (store store : myStores){
+            i++;
+            System.out.println(i + ". " + myStores.get(i-1).toString());
         }
         return categories;
     }
@@ -200,7 +213,7 @@ public class master {
         master master = new master();
 
         //master.read("src/main/resources");
-        
+
 
     }
 }
