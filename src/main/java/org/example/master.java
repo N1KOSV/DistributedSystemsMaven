@@ -1,6 +1,8 @@
 package org.example;
 
 import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.*;
 
 public class master {
@@ -14,6 +16,7 @@ public class master {
     public void start() {
         server.openServer();
     }
+
 
     static List<store> myStores = new ArrayList<store>();
 
@@ -50,6 +53,7 @@ public class master {
             }
         }
     }
+
 
     public void editStore() {
         Scanner scanner = new Scanner(System.in);
@@ -106,6 +110,8 @@ public class master {
             i++;
         }
     }
+
+
 
     public void newStore(Scanner scanner) throws IOException {
         System.out.println("Enter the name of the store");
@@ -174,13 +180,9 @@ public class master {
         int i = 0;for (store store : myStores){
             i++;
         System.out.println(i + ". " + myStores.get(i-1).toString());
+
         }
     }
-
-    public static Set<String> getStoreCategories() {
-        Set<String> categories = new HashSet<>();
-        for (store store : myStores) {
-            categories.add(store.foodCategory);
     public static Set<String> getStoreCategories() {
         Set<String> categories = new HashSet<>();
         for (store store : myStores) {
@@ -195,25 +197,16 @@ public class master {
             i++;
             System.out.println(i + ". " + myStores.get(i-1).toString());
         }
-        return categories;
     }
 
-    public void seeAvailableStores(double lon, double lat) {
-        double x = lon - lat;
-        int i = 0;for (store store : myStores){
-            i++;
-            System.out.println(i + ". " + myStores.get(i-1).toString());
-        }
-    }
 
     public static void main(String[] args) throws IOException {
         master masterServer = new master(5000);
         masterServer.start();
 
         master master = new master();
-
-        //master.read("src/main/resources");
-
+        master.read("src/main/resources");
+        System.out.println(myStores.get(0).isWithin5km(38.01, 23.74));
 
     }
 }
