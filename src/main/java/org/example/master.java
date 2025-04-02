@@ -205,8 +205,8 @@ public class master {
         masterServer.start();
 
         master master = new master();
-        master.read("src/main/resources");
-        System.out.println(myStores.get(0).isWithin5km(38.01, 23.74));
+        //master.read("src/main/resources");
+        //System.out.println(myStores.get(0).isWithin5km(38.01, 23.74));
 
     }
 }

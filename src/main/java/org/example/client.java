@@ -59,7 +59,7 @@ public class client extends Thread {
     }
 
     public static void main(String[] args) throws IOException {
-        for (int a = 0; a < 5; a++) {
+        for (int a = 0; a < 500; a++) {
             new client(a, a*2).start();
         }
     }

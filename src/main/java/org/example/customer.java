@@ -36,7 +36,6 @@ public class customer extends Thread{
     public void run() {
 		try {		
 			worker t =  (worker)in.readObject();
-			t.setAlive(true);
 			out.writeObject(t);
 			out.flush();
 		} catch (IOException e) {
