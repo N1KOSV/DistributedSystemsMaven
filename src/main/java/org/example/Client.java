@@ -4,27 +4,27 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class client extends Thread {
+public class Client extends Thread {
     private Socket socket;
+    int port = 5000;
     private int a;
     private int b;
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
-    public client(Socket socket) {
-        this.socket = socket;
-    }
+//    public client(Socket socket) {
+//        this.socket = socket;
+//    }
 
-    public client(int a, int b) {
+    public Client(int a, int b) {
         this.a = a;
         this.b = b;
     }
 
     public void run() {
         try {
-            int port = 5000;
+            //System.out.println("Running client for: " + a + " and " + b);
             socket = new Socket("localhost", port);
-            //System.out.println("Connected with the server on port " + port);
 
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
@@ -43,14 +43,8 @@ public class client extends Thread {
             e.printStackTrace();
         } finally {
             try {
-                if (out != null) {
-                    out.close();
-                }
                 if (socket != null) {
                     socket.close();
-                }
-                if (in != null) {
-                    in.close();
                 }
             } catch (IOException ioException) {
                 ioException.printStackTrace();
@@ -58,9 +52,14 @@ public class client extends Thread {
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        for (int a = 0; a < 500; a++) {
-            new client(a, a*2).start();
+    public static void main(String[] args) throws IOException, InterruptedException {
+//        for (int a = 0; a < 50; a++) {
+//            new client(a, a*2).start();
+//        }
+        for (int a = 0; a < 3; a++) {
+            Thread.sleep(1000);
+            new Client(a, a*2).start();
         }
+
     }
 }

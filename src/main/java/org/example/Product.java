@@ -1,7 +1,7 @@
 package org.example;
 
 
-public class product {
+public class Product {
 
     private String name;
     private String type;
@@ -9,7 +9,7 @@ public class product {
     private Double price;
     private int sales;
     
-    public product(String name, String type, int amount , Double price) {
+    public Product(String name, String type, int amount , Double price) {
         this.name = name;
         this.type = type;
         this.amount = amount;

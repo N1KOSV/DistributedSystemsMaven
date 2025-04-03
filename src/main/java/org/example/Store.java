@@ -2,7 +2,7 @@ package org.example;
 
 import java.util.*;
 
-public class store{
+public class Store {
 
     protected String name;
     private Double latitude;
@@ -11,10 +11,10 @@ public class store{
     private Double stars;
     private int votes;
     private String logo;
-    protected List<product> products;
+    protected List<Product> products;
     protected int storeID;
 
-    public store(String name, Double latitude, Double longitude, String foodCategory, Double stars, int votes, String logo, int storeID) {
+    public Store(String name, Double latitude, Double longitude, String foodCategory, Double stars, int votes, String logo, int storeID) {
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -27,10 +27,10 @@ public class store{
     }
 
     public void addProduct(String name, String type, int amount ,Double price){
-        products.add(new product(name,type,amount,price));
+        products.add(new Product(name,type,amount,price));
     }
 
-    public void addProduct(product p){
+    public void addProduct(Product p){
         products.add(p);
     }
 
@@ -38,13 +38,13 @@ public class store{
         return storeID;
     }
 
-    public List<product> getProducts() {
+    public List<Product> getProducts() {
         return products;
     }
     
     public String getAvgPrice(){
         int sum = 0;
-        for (product product : products) {
+        for (Product product : products) {
             sum += product.getPrice();
         }
         if (sum/products.size() < 5){return "$";}
@@ -54,7 +54,7 @@ public class store{
     
     public int getTotalSales(){
             int sales = 0;
-            for (product product : products) sales += product.getSales();
+            for (Product product : products) sales += product.getSales();
          return sales;}
 
     public boolean isWithin5km(double lat, double lon) {
@@ -72,7 +72,7 @@ public class store{
     
     public void printProducts(){
         int i = 0;
-        for (product p : products) {
+        for (Product p : products) {
             i++;
             System.out.println(i + ". " + p.getName() + " " + p.getType() +" ("+ p.getPrice() + " € )");
         }

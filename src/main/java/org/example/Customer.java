@@ -1,10 +1,9 @@
 package org.example;
 
 import java.io.*;
-import java.net.Socket;
 import java.util.*;
 
-public class customer extends Thread{
+public class Customer extends Thread{
     
     double latitude;
     double longitude;
@@ -17,7 +16,7 @@ public class customer extends Thread{
 	ObjectOutputStream out;
     
     
-    public customer(double longitude, double latitude) {
+    public Customer(double longitude, double latitude) {
         this.longitude = longitude;
         this.latitude = latitude;
         nrUsers++;
@@ -35,7 +34,7 @@ public class customer extends Thread{
     
     public void run() {
 		try {		
-			worker t =  (worker)in.readObject();
+			Worker t =  (Worker)in.readObject();
 			out.writeObject(t);
 			out.flush();
 		} catch (IOException e) {
@@ -53,7 +52,7 @@ public class customer extends Thread{
 		}
 	}
 
-	static master Master = new master();
+	static Master Master = new Master();
 
 	public static void main(String[] args) throws IOException {
 		Master.read("src/main/resources");
@@ -66,7 +65,7 @@ public class customer extends Thread{
 		double longitude = scanner.nextDouble();*/
 		double latitude = 38.02233;
 		double longitude = 23.7479;
-		customer currentCustomer = new customer(longitude, latitude); 
+		Customer currentCustomer = new Customer(longitude, latitude);
 		
 		System.out.print("What would you like to do?\n");
 		System.out.print("1. See all the available stores\n");

@@ -22,8 +22,8 @@ public class Server {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("Client connected: " + clientSocket.getInetAddress());
-
+                //System.out.println("Client connected: " + clientSocket.getInetAddress());
+                //System.out.println("Starting ActionsForClients for the client");
                 new Thread(new ActionsForClients(clientSocket)).start();
             }
         } catch (IOException e) {

@@ -1,15 +1,13 @@
 package org.example;
 
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.*;
 
-public class master {
-    public master() {}
+public class Master {
+    public Master() {}
     private Server server;
 
-    public master(int port) {
+    public Master(int port) {
         server = new Server(port);
     }
 
@@ -18,7 +16,7 @@ public class master {
     }
 
 
-    static List<store> myStores = new ArrayList<store>();
+    static List<Store> myStores = new ArrayList<Store>();
 
     public static void read(String path) throws IOException {
         File folder = new File(path);
@@ -31,18 +29,18 @@ public class master {
                 );
                 int id = 0;
                 for (File file : files) {
-                    parser parser = new parser(file.getPath());
+                    Parser parser = new Parser(file.getPath());
                     String[] myData = parser.getStore();
                     String[][] myProducts = parser.getProducts();
 
-                    store myStore = new store(
+                    Store myStore = new Store(
                             myData[0], Double.parseDouble(myData[1]), Double.parseDouble(myData[2]),
                             myData[3], Double.parseDouble(myData[4]), Integer.parseInt(myData[5]),
                             myData[6], id + 1
                     );
                     id++;
                     for (String[] myProdData : myProducts) {
-                        product myProduct = new product(
+                        Product myProduct = new Product(
                                 myProdData[0], myProdData[1], Integer.parseInt(myProdData[2]),
                                 Double.parseDouble(myProdData[3])
                         );
@@ -58,8 +56,8 @@ public class master {
     public void editStore() {
         Scanner scanner = new Scanner(System.in);
         int i = 1;
-        myStores.sort(Comparator.comparingInt(store::getStoreID));
-        for (store store : myStores) {System.out.println(i + ". " + store.name);i++;}
+        myStores.sort(Comparator.comparingInt(Store::getStoreID));
+        for (Store store : myStores) {System.out.println(i + ". " + store.name);i++;}
         System.out.println("Which store would you like to edit?");
         int answer = Integer.parseInt(scanner.nextLine());
         //parser parser = new parser("src/main/resources/Store"+answer+".json");
@@ -70,14 +68,14 @@ public class master {
             myStores.get(answer - 1).addProduct(productName,productType,Integer.parseInt(productAmount),Double.parseDouble(productPrice));}
         //parser.addProductJson(new String[] {productName, productType, productPrice, productAmount});}
         else if (answer2 == 2) {
-            for (product product : myStores.get(answer - 1).getProducts()) System.out.println(product.getName());
+            for (Product product : myStores.get(answer - 1).getProducts()) System.out.println(product.getName());
             answer2 = Integer.parseInt(scanner.nextLine());
             System.out.println("How much of this item is in stock?");
             int answer3 = Integer.parseInt(scanner.nextLine());
             myStores.get(answer - 1).products.get(answer2-1).setAmount(answer3);}
         else if (answer2 == 3) {
             i = 0;
-            for (product product : myStores.get(answer - 1).getProducts()) {
+            for (Product product : myStores.get(answer - 1).getProducts()) {
                 i++;
                 System.out.println(i + ". " + product.getName());
             }
@@ -90,22 +88,22 @@ public class master {
     public void sell() {
         Scanner scanner = new Scanner(System.in);
         int i = 1;
-        myStores.sort(Comparator.comparingInt(store::getStoreID));
-        for (store store : myStores) {
+        myStores.sort(Comparator.comparingInt(Store::getStoreID));
+        for (Store store : myStores) {
             System.out.println(i + ". " + store.name);
             i++;
         }
         System.out.println("Which store would you like to edit?");
         int answer = Integer.parseInt(scanner.nextLine());
         i = 0;
-        for (product product : myStores.get(answer - 1).getProducts()) {
+        for (Product product : myStores.get(answer - 1).getProducts()) {
             i++;
             System.out.println(i + ". " + product.getName());
         }
         int answer2 = Integer.parseInt(scanner.nextLine());
         myStores.get(answer - 1).sell(answer2 - 1);
         i = 0;
-        for (store store : myStores) {
+        for (Store store : myStores) {
             System.out.println(i + ". " + myStores.get(i).toString());
             i++;
         }
@@ -130,7 +128,7 @@ public class master {
         String storeLogo = scanner.nextLine();
         boolean moreProducts = true;
         int nrProducts = 0;
-        store myStore = new store(storeName,Double.valueOf(storeLat),Double.valueOf(storeLon),storeType,Double.valueOf(storeStars),Integer.parseInt(storeRatings),storeLogo,myStores.size());
+        Store myStore = new Store(storeName,Double.valueOf(storeLat),Double.valueOf(storeLon),storeType,Double.valueOf(storeStars),Integer.parseInt(storeRatings),storeLogo,myStores.size());
         myStores.add(myStore);
         while (moreProducts) {
             nrProducts++;
@@ -157,7 +155,7 @@ public class master {
         int i =0;
         
         //read("src/main/resources");
-        for (store store : myStores) {
+        for (Store store : myStores) {
             i++;
             System.out.println(i + ". " + store.toString() + " - " + myStores.get(i-1).products.size());
         }
@@ -177,7 +175,7 @@ public class master {
     // ΝΔ πώς θα χρησιμοποιήσω mapReduce και για τί KVPs
     
     public void seeAllAvailableStores() {
-        int i = 0;for (store store : myStores){
+        int i = 0;for (Store store : myStores){
             i++;
         System.out.println(i + ". " + myStores.get(i-1).toString());
 
@@ -185,7 +183,7 @@ public class master {
     }
     public static Set<String> getStoreCategories() {
         Set<String> categories = new HashSet<>();
-        for (store store : myStores) {
+        for (Store store : myStores) {
             categories.add(store.foodCategory);
         }
         return categories;
@@ -193,7 +191,7 @@ public class master {
 
     public void seeAvailableStores(double lon, double lat) {
         double x = lon - lat;
-        int i = 0;for (store store : myStores){
+        int i = 0;for (Store store : myStores){
             i++;
             System.out.println(i + ". " + myStores.get(i-1).toString());
         }
@@ -201,10 +199,10 @@ public class master {
 
 
     public static void main(String[] args) throws IOException {
-        master masterServer = new master(5000);
+        Master masterServer = new Master(5000);
         masterServer.start();
 
-        master master = new master();
+        Master master = new Master();
         //master.read("src/main/resources");
         //System.out.println(myStores.get(0).isWithin5km(38.01, 23.74));
 

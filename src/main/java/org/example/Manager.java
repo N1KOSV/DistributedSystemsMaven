@@ -1,12 +1,11 @@
 package org.example;
 
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.Scanner;
 
-public class manager {
+public class Manager {
     
-    static master Master = new master();
+    static Master Master = new Master();
     
     public static void main(String[] args) throws IOException {
         Master.read("src/main/resources");

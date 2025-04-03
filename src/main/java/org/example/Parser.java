@@ -4,12 +4,12 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.regex.*;
 
-public class parser {
+public class Parser {
 
     String[][] productArray;
     static String path;
 
-    public parser(String path) {
+    public Parser(String path) {
         this.path = path;
     }
 
