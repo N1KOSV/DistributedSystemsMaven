@@ -1,20 +1,31 @@
 package org.example;
 
 import java.io.*;
+import java.net.Socket;
 import java.util.*;
 
-public class Master {
-    public Master() {}
-    private Server server;
+public class Master extends Thread {
 
-    public Master(int port) {
-        server = new Server(port);
+    public void run() {
+        Socket socket = null;
+        ObjectOutputStream out = null;
+        ObjectInputStream in = null;
+        try {
+            socket = new Socket("127.0.0.1", 5000);
+            out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
+
+            out.writeObject("Hi Worker!");
+            out.flush();
+
+            String response = (String) in.readObject();
+            System.out.println("Master received from Reducer: " + response);
+
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Master failed.");
+            e.printStackTrace();
+        }
     }
-
-    public void start() {
-        server.openServer();
-    }
-
 
     static List<Store> myStores = new ArrayList<Store>();
 
@@ -198,11 +209,10 @@ public class Master {
     }
 
 
-    public static void main(String[] args) throws IOException {
-        Master masterServer = new Master(5000);
-        masterServer.start();
-
+    public static void main(String[] args){
         Master master = new Master();
+        master.start();
+
         //master.read("src/main/resources");
         //System.out.println(myStores.get(0).isWithin5km(38.01, 23.74));
 

@@ -1,37 +1,32 @@
-//package org.example;
-//
-//import java.io.IOException;
-//import java.io.ObjectInputStream;
-//import java.io.ObjectOutputStream;
-//import java.net.Socket;
-//
-//public class ActionsForWorker implements Runnable {
-//    private final Socket socket;
-//    public ActionsForWorker(Socket socket) {
-//        this.socket = socket;
-//    }
-//
-//    @Override
-//    public void run() {
-//        try {
-//            ObjectOutputStream out = new ObjectOutputStream((socket.getOutputStream()));
-//            ObjectInputStream in = new ObjectInputStream((socket.getInputStream()));
-//
-//            Object received = in.readObject();
-//            System.out.println("Client received: " + received);
-//
-//            out.writeObject("msg received: " + received);
-//            out.flush();
-//
-//        } catch (IOException | ClassNotFoundException e) {
-//            throw new RuntimeException(e);
-//        } finally {
-//            try {
-//                socket.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-//
-//}
+package org.example;
+
+import java.io.*;
+import java.net.Socket;
+
+class ActionsForWorker extends Thread {
+    ObjectInputStream in;
+    ObjectOutputStream out;
+
+    public ActionsForWorker(Socket socket) {
+        try {
+            in = new ObjectInputStream(socket.getInputStream());
+            out = new ObjectOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void run() {
+        try {
+            String received = (String) in.readObject();
+            System.out.println("AWorker received from Master: " + received);
+
+            out.writeObject("Hi Reducer");
+            out.flush();
+
+        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Actions for Worker failed.");
+            e.printStackTrace();
+        }
+    }
+}
