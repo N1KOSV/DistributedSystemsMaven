@@ -18,13 +18,12 @@ public class Server {
     void openServer() {
         try {
             ServerSocket serverSocket = new ServerSocket(port);
-            System.out.println("Server is listening on port " + serverSocket.getLocalPort());
+            System.out.println("Master server is listening on port " + serverSocket.getLocalPort());
 
             while (true) {
-                Socket clientSocket = serverSocket.accept();
-                //System.out.println("Client connected: " + clientSocket.getInetAddress());
-                //System.out.println("Starting ActionsForClients for the client");
-                new Thread(new ActionsForClients(clientSocket)).start();
+                Socket workerSocket = serverSocket.accept();
+                System.out.println("Worker connected: " + workerSocket.getInetAddress());
+                new Thread(new ActionsForWorker(workerSocket)).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
