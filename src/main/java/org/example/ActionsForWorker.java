@@ -4,25 +4,33 @@ import java.io.*;
 import java.net.Socket;
 
 class ActionsForWorker extends Thread {
-    ObjectInputStream in;
-    ObjectOutputStream out;
+    Socket socket;
 
     public ActionsForWorker(Socket socket) {
-        try {
-            in = new ObjectInputStream(socket.getInputStream());
-            out = new ObjectOutputStream(socket.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.socket = socket;
     }
 
     public void run() {
         try {
-            String received = (String) in.readObject();
-            System.out.println("AWorker received from Master: " + received);
+            //Connection with ReducerServer
+            Socket ReducerSocket = new Socket("127.0.0.1", 5002);
+            ObjectOutputStream ReducerOut = new ObjectOutputStream(ReducerSocket.getOutputStream());
+            //ObjectInputStream ReducerIn = new ObjectInputStream(socket.getInputStream());
 
-            out.writeObject("Hi Reducer");
-            out.flush();
+            //Connection with MasterServer
+            //Socket MasterSocket = new Socket("127.0.0.1", 5000);
+            ObjectOutputStream MasterOut = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream MasterIn = new ObjectInputStream(socket.getInputStream());
+            //na ksekinaei o worker
+            String received = (String) MasterIn.readObject();
+            System.out.println("Worker received from Master: " + received);
+
+            String data = received + "Processed from Worker";
+            ReducerOut.writeObject(data);
+            ReducerOut.flush();
+
+            ReducerSocket.close();
+            socket.close();
 
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Actions for Worker failed.");

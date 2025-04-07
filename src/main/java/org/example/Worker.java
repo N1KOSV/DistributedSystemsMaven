@@ -17,11 +17,11 @@ public class Worker extends Thread {
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
 
-            out.writeObject("Hi Reducer!");
-            out.flush();
-
             String response = (String) in.readObject();
             System.out.println("Worker received from Master: " + response);
+
+            out.writeObject("Hi Reducer!");
+            out.flush();
 
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Worker failed.");

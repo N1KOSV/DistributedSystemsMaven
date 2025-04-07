@@ -7,20 +7,18 @@ import java.util.*;
 public class Master extends Thread {
 
     public void run() {
-        Socket socket = null;
-        ObjectOutputStream out = null;
-        ObjectInputStream in = null;
         try {
-            socket = new Socket("127.0.0.1", 5000);
-            out = new ObjectOutputStream(socket.getOutputStream());
-            in = new ObjectInputStream(socket.getInputStream());
+             Socket socket = new Socket("127.0.0.1", 5000);
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
-            out.writeObject("Hi Worker!");
+            out.writeObject("Data");
             out.flush();
 
             String response = (String) in.readObject();
             System.out.println("Master received from Reducer: " + response);
 
+            socket.close();
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Master failed.");
             e.printStackTrace();

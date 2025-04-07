@@ -17,11 +17,11 @@ public class Reducer extends Thread {
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
 
-            out.writeObject("Hi Master!");
-            out.flush();
-
             String response = (String) in.readObject();
             System.out.println("Reducer received from Worker: " + response);
+
+            out.writeObject("Hi Master!");
+            out.flush();
 
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Reducer failed.");
