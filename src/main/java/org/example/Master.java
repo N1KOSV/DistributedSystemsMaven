@@ -8,10 +8,10 @@ public class Master extends Thread {
 
     public void run() {
         try {
-             Socket socket = new Socket("127.0.0.1", 5000);
+             Socket socket = new Socket("127.0.0.1", 5009);
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-
+            out.flush();
             out.writeObject("Data");
             out.flush();
 

@@ -10,7 +10,7 @@ public class ReducerServer{
 
             while (true) {
                 Socket socket = serverSocket.accept();
-                System.out.println("Reducer connected" + socket.getInetAddress());
+                System.out.println("Reducer connected " + socket.getInetAddress());
 
                 Thread m = new ActionsForReducer(socket);
                 m.start();

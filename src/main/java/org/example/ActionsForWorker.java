@@ -10,31 +10,38 @@ class ActionsForWorker extends Thread {
         this.socket = socket;
     }
 
+    private volatile boolean running = true;
+
+    public void stopThread() {
+        running = false;
+    }
+
     public void run() {
-        try {
-            //Connection with ReducerServer
-            Socket ReducerSocket = new Socket("127.0.0.1", 5002);
-            ObjectOutputStream ReducerOut = new ObjectOutputStream(ReducerSocket.getOutputStream());
-            //ObjectInputStream ReducerIn = new ObjectInputStream(socket.getInputStream());
+        while (running) {
+            try {
+                // Read data from Master (through existing socket)
+                ObjectInputStream masterIn = new ObjectInputStream(socket.getInputStream());
+                String receivedFromMaster = (String) masterIn.readObject();
 
-            //Connection with MasterServer
-            //Socket MasterSocket = new Socket("127.0.0.1", 5000);
-            ObjectOutputStream MasterOut = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream MasterIn = new ObjectInputStream(socket.getInputStream());
-            //na ksekinaei o worker
-            String received = (String) MasterIn.readObject();
-            System.out.println("Worker received from Master: " + received);
+                // Process data (map operation)
+                String processedData = receivedFromMaster + " Processed from Worker";
 
-            String data = received + "Processed from Worker";
-            ReducerOut.writeObject(data);
-            ReducerOut.flush();
+                // Send to Reducer
+                Socket reducerSocket = new Socket("127.0.0.1", 5002);
+                ObjectOutputStream reducerOut = new ObjectOutputStream(reducerSocket.getOutputStream());
+                reducerOut.writeObject(processedData);
+                reducerOut.flush();
 
-            ReducerSocket.close();
-            socket.close();
+                // Clean up
+                reducerSocket.close();
+                socket.close();
+                stopThread();
 
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Actions for Worker failed.");
-            e.printStackTrace();
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("Actions for Worker failed.");
+                e.printStackTrace();
+                stopThread();
+            }
         }
     }
 }

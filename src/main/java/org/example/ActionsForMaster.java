@@ -10,34 +10,50 @@ public class ActionsForMaster extends Thread {
         this.socket = socket;
     }
 
+    private volatile boolean running = true;
+
+    public void stopThread() {
+        running = false;
+    }
+
     public void run() {
-        try {
-            //Connection with WorkerServer
-            Socket Workersocket = new Socket("127.0.0.1", 5001);
-            ObjectOutputStream WorkerOut = new ObjectOutputStream(Workersocket.getOutputStream());
-            ObjectInputStream WorkerIn = new ObjectInputStream(Workersocket.getInputStream());
+        while (running) {
+            try {
+                //Connection with WorkerServer
+                Socket Workersocket = new Socket("127.0.0.1", 5001);
+                ObjectOutputStream WorkerOut = new ObjectOutputStream(Workersocket.getOutputStream());
+                //ObjectInputStream WorkerIn = new ObjectInputStream(Workersocket.getInputStream());
 
-            WorkerOut.writeObject("Raw Data");
-            WorkerOut.flush();
 
-            //Connection with ReducerServer
-            //Socket ReducerSocket = new Socket("127.0.0.1", 5002);
-            //ObjectOutputStream ReducerOut = new ObjectOutputStream(ReducerSocket.getOutputStream());
-            //ObjectInputStream ReducerIn = new ObjectInputStream(ReducerSocket.getInputStream());
+                WorkerOut.writeObject("Raw Data");
+                WorkerOut.flush();
 
-            String received = (String) WorkerIn.readObject();
-            System.out.println("Master received from Reducer: " + received);
+                //Connection with ReducerServer
+                System.out.println("About to connect to Reducer");
+                Socket ReducerSocket = new Socket("127.0.0.1", 5002);
+                System.out.println("Connected to Reducer");
 
-            Workersocket.close();
+                //ReducerSocket.setSoTimeout(50); // 5 second timeout
+                System.out.println("Attempting to create ReducerIn stream");
+                ObjectInputStream ReducerIn = new ObjectInputStream(ReducerSocket.getInputStream());
+                System.out.println("You can see me");
+                String received = (String) ReducerIn.readObject();
+                
+                System.out.println("Master received from Reducer: " + received);
 
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.writeObject(received);
-            out.flush();
-            socket.close();
+                Workersocket.close();
 
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Actions for master failed");
-            e.printStackTrace();
+                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                out.writeObject(received);
+                out.flush();
+                socket.close();
+                stopThread();
+
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("Actions for master failed");
+                stopThread();
+                e.printStackTrace();
+            }
         }
     }
 }

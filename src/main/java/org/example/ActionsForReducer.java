@@ -10,31 +10,40 @@ class ActionsForReducer extends Thread {
        this.socket = socket;
     }
 
+    private volatile boolean running = true;
+
+    public void stopThread() {
+        running = false;
+    }
+
     public void run() {
-        try{
-            //Connection with MasterServer
-            Socket MasterSocket = new Socket("127.0.0.1", 5000);
-            ObjectOutputStream MasterOut = new ObjectOutputStream(MasterSocket.getOutputStream());
-            //ObjectInputStream MasterIn = new ObjectInputStream(MasterSocket.getInputStream());
+        while (running) {
+            try {
+                //Connection with MasterServer
+                // Receive data from Worker
+                ObjectInputStream workerIn = new ObjectInputStream(socket.getInputStream());
+                String receivedFromWorker = (String) workerIn.readObject();
 
-            //Connection with WorkerServer
-            //Socket WorkerSocket = new Socket("127.0.0.1", 5001);
-            ObjectOutputStream WorkerOut = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream WorkerIn = new ObjectInputStream(socket.getInputStream());
+                // Process data (reduce operation)
+                String reducedData = receivedFromWorker + " Processed from Reducer";
+                System.out.println(reducedData);
+                // Connect back to Master
+                Socket masterSocket = new Socket("127.0.0.1", 5009); // Use correct MasterServer port
+                System.out.println("Reducer: Connection received");
+                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                out.writeObject("Initial header data"); // Send something immediately
+                out.flush();
+                System.out.println("Reducer: Sent initial data");
 
-            String received = (String) WorkerIn.readObject();
-            System.out.println("Reducer received from Worker: " + received);
-
-            String data = received + "Processed from Reducer";
-            MasterOut.writeObject(data);
-            MasterOut.flush();
-
-            MasterSocket.close();
-            socket.close();
-
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Actions for Reducer failed.");
-            e.printStackTrace();
+                // Clean up
+                masterSocket.close();
+                socket.close();
+                stopThread();
+            } catch (IOException | ClassNotFoundException e) {
+                System.out.println("Actions for Reducer failed.");
+                e.printStackTrace();
+                stopThread();
+            }
         }
     }
 }

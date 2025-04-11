@@ -1,8 +1,9 @@
 package org.example;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Store {
+public class Store implements Serializable {
 
     protected String name;
     private Double latitude;
