@@ -14,7 +14,7 @@ public class MasterServer {
                 System.out.println(i);
                 Socket socket = serverSocket.accept();
                 Thread m = new ActionsForMaster(socket);
-                m.start();
+                //m.start();
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 String msg = (String) in.readObject();
                 System.out.println("Master received from Reducer: " + msg);

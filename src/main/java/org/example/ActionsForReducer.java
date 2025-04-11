@@ -30,7 +30,7 @@ class ActionsForReducer extends Thread {
                 // Connect back to Master
                 Socket masterSocket = new Socket("127.0.0.1", 5009); // Use correct MasterServer port
                 System.out.println("Reducer: Connection received");
-                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                ObjectOutputStream out = new ObjectOutputStream(masterSocket.getOutputStream());
                 out.writeObject("Initial header data"); // Send something immediately
                 out.flush();
                 System.out.println("Reducer: Sent initial data");
