@@ -27,7 +27,7 @@ class ActionsForWorker extends Thread {
                 String processedData = receivedFromMaster + " Processed from Worker";
 
                 // Send to Reducer
-                Socket reducerSocket = new Socket("127.0.0.1", 5002);
+                Socket reducerSocket = new Socket("127.0.0.2", 5002);
                 ObjectOutputStream reducerOut = new ObjectOutputStream(reducerSocket.getOutputStream());
                 reducerOut.writeObject(processedData);
                 reducerOut.flush();

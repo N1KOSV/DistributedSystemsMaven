@@ -13,7 +13,7 @@ public class Reducer extends Thread {
         ObjectOutputStream out = null;
         ObjectInputStream in = null;
         try {
-            socket = new Socket("127.0.0.1", 5002);
+            socket = new Socket("127.0.0.2", 5002);
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
 

@@ -22,13 +22,14 @@ class ActionsForReducer extends Thread {
                 //Connection with MasterServer
                 // Receive data from Worker
                 ObjectInputStream workerIn = new ObjectInputStream(socket.getInputStream());
+                //ObjectOutputStream WorkerOut = new ObjectOutputStream(socket.getOutputStream());
                 String receivedFromWorker = (String) workerIn.readObject();
 
                 // Process data (reduce operation)
                 String reducedData = receivedFromWorker + " Processed from Reducer";
                 System.out.println(reducedData);
                 // Connect back to Master
-                Socket masterSocket = new Socket("127.0.0.1", 5009); // Use correct MasterServer port
+                Socket masterSocket = new Socket("127.0.0.2", 5012); // Use correct MasterServer port
                 System.out.println("Reducer: Connection received");
                 ObjectOutputStream out = new ObjectOutputStream(masterSocket.getOutputStream());
                 out.writeObject("Initial header data"); // Send something immediately
@@ -36,7 +37,7 @@ class ActionsForReducer extends Thread {
                 System.out.println("Reducer: Sent initial data");
 
                 // Clean up
-                masterSocket.close();
+                //WorkerOut.close();
                 socket.close();
                 stopThread();
             } catch (IOException | ClassNotFoundException e) {

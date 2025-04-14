@@ -8,7 +8,7 @@ public class Master extends Thread {
 
     public void run() {
         try {
-             Socket socket = new Socket("127.0.0.1", 5009);
+             Socket socket = new Socket("127.0.0.1", 5012);
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
             out.flush();
