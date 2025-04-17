@@ -39,15 +39,11 @@ public class ActionsForMaster extends Thread {
         }
         else{
                 try{
-                    Socket ReducerSocket = new Socket("127.0.0.2", 5002);
-                    System.out.println("Άϊντ' αλλά φουμέντο και μαστουριόρε, με τε γκομενέτε, ο τεκέ");
-                    String received = "";
-                    while (received == "") {
-                    ObjectInputStream ReducerIn = new ObjectInputStream(ReducerSocket.getInputStream());
-                    received = (String) ReducerIn.readObject();
-                    }
+                    //Socket ReducerSocket = new Socket("127.0.0.1", 5002);
+                    ObjectInputStream ReducerIn = new ObjectInputStream(socket.getInputStream());
+                    String received = (String) ReducerIn.readObject();
+                    //System.out.println("Άϊντ' αλλά φουμέντο και μαστουριόρε, με τε γκομενέτε, ο τεκέ");
                     System.out.println("Master received from Reducer: " + received);
-                    ReducerSocket.close();
                     socket.close();
                     stopThread();
                 }

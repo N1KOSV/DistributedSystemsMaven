@@ -9,7 +9,6 @@ public class MasterServer {
             System.out.println("Master Server is listening on port " + serverSocket.getLocalPort());
             int i = 0;
             while (true) {
-                System.out.println(i);
                 Socket socket = serverSocket.accept();
                 String clientAddress = socket.getInetAddress().getHostAddress();
                 System.out.println(clientAddress);
@@ -27,7 +26,6 @@ public class MasterServer {
                     Thread m = new ActionsForMaster(socket, "2");
                     m.start();
                 }
-                System.out.println(clientAddress);
                 //ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 //String msg = (String) in.readObject();
                 //System.out.println("Master received from Reducer: " + msg);

@@ -32,14 +32,14 @@ class ActionsForReducer extends Thread {
                 Socket masterSocket = new Socket("127.0.0.2", 5012); // Use correct MasterServer port
                 System.out.println("Reducer: Connection received");
                 ObjectOutputStream out = new ObjectOutputStream(masterSocket.getOutputStream());
-                out.writeObject("Initial header data"); // Send something immediately
+                out.writeObject(reducedData); // Send something immediately
                 out.flush();
                 System.out.println("Reducer: Sent initial data");
 
                 // Clean up
                 //WorkerOut.close();
-                masterSocket.close();
-                socket.close();
+                //masterSocket.close();
+                //socket.close();
                 stopThread();
             } catch (IOException | ClassNotFoundException e) {
                 System.out.println("Actions for Reducer failed.");
