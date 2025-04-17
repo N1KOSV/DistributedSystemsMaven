@@ -23,7 +23,7 @@ class ActionsForReducer extends Thread {
             ObjectInputStream WorkerIn = new ObjectInputStream(socket.getInputStream());
 
             String received = (String) WorkerIn.readObject();
-            System.out.println("Reducer received from Worker: " + received);
+            System.out.println("AReducer received from Worker: " + received);
 
             String data = received + "Processed from Reducer";
             MasterOut.writeObject(data);

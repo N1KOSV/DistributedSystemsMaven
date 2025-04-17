@@ -15,7 +15,7 @@ class ActionsForWorker extends Thread {
             //Connection with ReducerServer
             Socket ReducerSocket = new Socket("127.0.0.1", 5002);
             ObjectOutputStream ReducerOut = new ObjectOutputStream(ReducerSocket.getOutputStream());
-            //ObjectInputStream ReducerIn = new ObjectInputStream(socket.getInputStream());
+            ObjectInputStream ReducerIn = new ObjectInputStream(socket.getInputStream());
 
             //Connection with MasterServer
             //Socket MasterSocket = new Socket("127.0.0.1", 5000);
@@ -23,7 +23,7 @@ class ActionsForWorker extends Thread {
             ObjectInputStream MasterIn = new ObjectInputStream(socket.getInputStream());
             //na ksekinaei o worker
             String received = (String) MasterIn.readObject();
-            System.out.println("Worker received from Master: " + received);
+            System.out.println("AWorker received from Master: " + received);
 
             String data = received + "Processed from Worker";
             ReducerOut.writeObject(data);

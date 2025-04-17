@@ -11,7 +11,6 @@ public class MasterServer{
             while (true) {
                 Socket socket = serverSocket.accept();
                 System.out.println("Master connected" + socket.getInetAddress());
-
                 Thread m = new ActionsForMaster(socket);
                 m.start();
             }

@@ -1,10 +1,27 @@
 package org.example;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
 public class Master extends Thread {
+
+//    void openServer () {
+//        try (ServerSocket serverSocket = new ServerSocket(5000)) {
+//            System.out.println("Master Server is listening on port " + serverSocket.getLocalPort());
+//
+//            while (true) {
+//                Socket socket = serverSocket.accept();
+//                System.out.println("Master connected" + socket.getInetAddress());
+//
+//                Thread m = new ActionsForMaster(socket);
+//                m.start();
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public void run() {
         try {
@@ -208,6 +225,9 @@ public class Master extends Thread {
 
 
     public static void main(String[] args){
+//        Master masterServer = new Master();
+//        new Thread(masterServer::openServer).start();
+
         Master master = new Master();
         master.start();
 
