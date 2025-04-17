@@ -12,19 +12,22 @@ public class MasterServer {
                 System.out.println(i);
                 Socket socket = serverSocket.accept();
                 String clientAddress = socket.getInetAddress().getHostAddress();
+                System.out.println(clientAddress);
                 if (clientAddress.endsWith("1")) {
-                    System.out.println("First Case");
-                    Thread m = new ActionsForMaster(socket, "1");
-                    m.start();
-                    i++;
+                    if (i==0) {
+                        System.out.println("First Case");
+                        Thread m = new ActionsForMaster(socket, "1");
+                        m.start();
+                        i++;
+                    }
                 }
                 else{
                     System.out.println(socket);
                     System.out.println("Second Case");
                     Thread m = new ActionsForMaster(socket, "2");
                     m.start();
-                    break;
                 }
+                System.out.println(clientAddress);
                 //ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 //String msg = (String) in.readObject();
                 //System.out.println("Master received from Reducer: " + msg);

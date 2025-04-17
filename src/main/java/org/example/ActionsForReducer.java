@@ -38,6 +38,7 @@ class ActionsForReducer extends Thread {
 
                 // Clean up
                 //WorkerOut.close();
+                masterSocket.close();
                 socket.close();
                 stopThread();
             } catch (IOException | ClassNotFoundException e) {

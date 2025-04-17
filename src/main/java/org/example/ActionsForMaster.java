@@ -20,38 +20,43 @@ public class ActionsForMaster extends Thread {
 
     public void run() {
         while (running) {
+            if (situation.equals("1")){
             try {
-                if (situation.equals("1")) {
+                //Connection with WorkerServer
                 Socket Workersocket = new Socket("127.0.0.1", 5001);
-                
-                    ObjectOutputStream WorkerOut = new ObjectOutputStream(Workersocket.getOutputStream());
-
-                    WorkerOut.writeObject("Raw Data");
-                    WorkerOut.flush();
-                    Workersocket.close();
-                    socket.close();
-                    //} catch (IOException | ClassNotFoundException e) {
-
-                } else {
-                    Socket ReducerSocket = new Socket("127.0.0.2", 5002);
-                    ObjectInputStream ReducerIn = new ObjectInputStream(ReducerSocket.getInputStream());
-                    System.out.println("Connected to Reducer");
-                    System.out.println("You can see me");
-                    String received = (String) ReducerIn.readObject();
-                    System.out.println("Master received from Reducer: " + received);
-                    String reducedData = received + " Processed from Reducer";
-                    System.out.println(reducedData);
-                    ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                    out.writeObject(reducedData);
-                    out.flush();
-                    System.out.println("Reducer: Sent processed data");
-                    socket.close();
-                }
-
-            } catch (IOException | ClassNotFoundException e) {
+                ObjectOutputStream WorkerOut = new ObjectOutputStream(Workersocket.getOutputStream());
+                WorkerOut.writeObject("Raw Data");
+                WorkerOut.flush();
+                Workersocket.close();
+                socket.close();
+                stopThread();
+            } catch (IOException e) {
                 System.out.println("Actions for master failed");
                 stopThread();
                 e.printStackTrace();
+                stopThread();
+            }
+        }
+        else{
+                try{
+                    Socket ReducerSocket = new Socket("127.0.0.2", 5002);
+                    System.out.println("Άϊντ' αλλά φουμέντο και μαστουριόρε, με τε γκομενέτε, ο τεκέ");
+                    String received = "";
+                    while (received == "") {
+                    ObjectInputStream ReducerIn = new ObjectInputStream(ReducerSocket.getInputStream());
+                    received = (String) ReducerIn.readObject();
+                    }
+                    System.out.println("Master received from Reducer: " + received);
+                    ReducerSocket.close();
+                    socket.close();
+                    stopThread();
+                }
+                catch(Exception e){
+                    System.out.println("Actions for master failed 2");
+                    stopThread();
+                    e.printStackTrace();
+                    stopThread();
+                }
             }
         }
     }
