@@ -1,5 +1,4 @@
 package org.example;
-
 import java.io.*;
 import java.net.*;
 
@@ -21,8 +20,6 @@ public class MasterServer {
                     }
                 }
                 else{
-                    System.out.println(socket);
-                    System.out.println("Second Case");
                     Thread m = new ActionsForMaster(socket, "2");
                     m.start();
                 }

@@ -12,7 +12,7 @@ public class Master extends Thread {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             //ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
             out.flush();
-            out.writeObject("Data");
+            out.writeObject("Data_Data");
             out.flush();
 
             //String response = (String) in.readObject();

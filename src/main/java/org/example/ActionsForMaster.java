@@ -20,29 +20,32 @@ public class ActionsForMaster extends Thread {
 
     public void run() {
         while (running) {
-            if (situation.equals("1")){
-            try {
-                //Connection with WorkerServer
-                Socket Workersocket = new Socket("127.0.0.1", 5001);
-                ObjectOutputStream WorkerOut = new ObjectOutputStream(Workersocket.getOutputStream());
-                WorkerOut.writeObject("Raw Data");
-                WorkerOut.flush();
-                Workersocket.close();
-                socket.close();
-                stopThread();
-            } catch (IOException e) {
-                System.out.println("Actions for master failed");
-                stopThread();
-                e.printStackTrace();
-                stopThread();
+            if (situation.equals("1")) {
+                try {
+                    //WorkerServer S1 = new WorkerServer(5001);
+                    Socket Workersocket = new Socket("127.0.0.1", 5001);
+                    //S1.openServer();
+
+                    ObjectOutputStream WorkerOut = new ObjectOutputStream(Workersocket.getOutputStream());
+                    ObjectInputStream MasterIn = new ObjectInputStream(socket.getInputStream());
+                    WorkerOut.writeObject(MasterIn.readObject().toString());
+                    WorkerOut.flush();
+                    Workersocket.close();
+                    socket.close();
+                    stopThread();
+                } catch (IOException e) {
+                    System.out.println("Actions for master failed");
+                    stopThread();
+                    e.printStackTrace();
+                    stopThread();
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
             }
-        }
         else{
                 try{
-                    //Socket ReducerSocket = new Socket("127.0.0.1", 5002);
                     ObjectInputStream ReducerIn = new ObjectInputStream(socket.getInputStream());
                     String received = (String) ReducerIn.readObject();
-                    //System.out.println("Άϊντ' αλλά φουμέντο και μαστουριόρε, με τε γκομενέτε, ο τεκέ");
                     System.out.println("Master received from Reducer: " + received);
                     socket.close();
                     stopThread();
