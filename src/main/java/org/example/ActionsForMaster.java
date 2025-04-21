@@ -33,28 +33,43 @@ public class ActionsForMaster extends Thread {
                     stopThread();
                 } catch (IOException e) {
                     System.out.println("Actions for master failed");
-                    stopThread();
                     e.printStackTrace();
                     stopThread();
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException(e);
                 }
             }
-        else{
-                try{
+            else {
+                try {
+                    // First receive data from Reducer
                     ObjectInputStream ReducerIn = new ObjectInputStream(socket.getInputStream());
-                    ObjectOutputStream MasterOut = new ObjectOutputStream(socket.getOutputStream());
                     String received = (String) ReducerIn.readObject();
-                    System.out.println("Master received from Reducer: " + received);
-                    MasterOut.writeObject(received);
-                    MasterOut.flush();
-                    MasterOut.close();
+                    System.out.println("ActionsForMaster received from Reducer: " + received);
+
+                    // Now connect to Master.java and forward the data
+                    Socket masterSocket = new Socket("127.0.0.1", 5013);
+                    ObjectOutputStream masterOut = new ObjectOutputStream(masterSocket.getOutputStream());
+                    masterOut.flush();
+                    masterOut.writeObject(received);
+                    masterOut.flush();
+                    System.out.println("ActionsForMaster forwarded data to Master");
+
+                    // Send acknowledgment back to Reducer if needed
+                    ObjectOutputStream ReducerOut = new ObjectOutputStream(socket.getOutputStream());
+                    ReducerOut.flush();
+                    ReducerOut.writeObject("Received");
+                    ReducerOut.flush();
+
+                    // Close resources
+                    masterOut.close();
+                    masterSocket.close();
+                    ReducerIn.close();
+                    ReducerOut.close();
                     socket.close();
                     stopThread();
                 }
-                catch(Exception e){
+                catch(Exception e) {
                     System.out.println("Actions for master failed 2");
-                    stopThread();
                     e.printStackTrace();
                     stopThread();
                 }

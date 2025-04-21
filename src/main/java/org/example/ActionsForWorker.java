@@ -22,6 +22,7 @@ class ActionsForWorker extends Thread {
                 // Read data from Master (through existing socket)
                 ObjectInputStream masterIn = new ObjectInputStream(socket.getInputStream());
                 String receivedFromMaster = (String) masterIn.readObject();
+                System.out.println("88");
 
                 // Process data (map operation)
                 String processedData = receivedFromMaster + " Processed from Worker";

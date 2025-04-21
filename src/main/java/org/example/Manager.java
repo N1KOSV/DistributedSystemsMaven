@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class Manager {
     
-    static Master Master = new Master();
+    static Master Master = new Master(0,0,true);
     
     public static void main(String[] args) throws IOException {
         Master.read("src/main/resources");

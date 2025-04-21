@@ -8,7 +8,7 @@ public class Customer extends Thread{
     double latitude;
     double longitude;
     int userId;
-    static int nrUsers;
+    static int nrUsers = 0;
 	static List<String> filters;
 	
 
@@ -52,7 +52,7 @@ public class Customer extends Thread{
 		}
 	}
 
-	static Master Master = new Master();
+
 
 	public static void main(String[] args) throws IOException {
 		Master.read("src/main/resources");
@@ -65,7 +65,8 @@ public class Customer extends Thread{
 		double longitude = scanner.nextDouble();*/
 		double latitude = 38.02233;
 		double longitude = 23.7479;
-		Customer currentCustomer = new Customer(longitude, latitude);
+		Master master = new Master(latitude,longitude,false);
+		//Customer currentCustomer = new Customer(longitude, latitude);
 		
 		System.out.print("What would you like to do?\n");
 		System.out.print("1. See all the available stores\n");

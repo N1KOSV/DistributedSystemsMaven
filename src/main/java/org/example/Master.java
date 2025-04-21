@@ -1,26 +1,56 @@
 package org.example;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
 public class Master extends Thread {
 
+
+    double latitude;
+    double longitude;
+    int userId;
+    static int nrUsers = 0;
+    boolean isAdmin;
+    
+    
+    public Master(double longitude, double latitude, boolean isAdmin) {
+        this.longitude = longitude;
+        this.latitude = latitude;
+        nrUsers++;
+        this.isAdmin = isAdmin;
+        userId = nrUsers;
+    }
+
     public void run() {
         try {
-            Socket socket = new Socket("127.0.0.1", 5012);
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+            // Create a ServerSocket to receive data from ActionsForMaster
+            ServerSocket masterReceiver = new ServerSocket(5013); // Use a different port
+            System.out.println("Master waiting for response on port 5013");
+
+            // Send request to MasterServer to start the process
+            Socket requestSocket = new Socket("127.0.0.1", 5012);
+            ObjectOutputStream out = new ObjectOutputStream(requestSocket.getOutputStream());
             out.flush();
             out.writeObject("Data_Data");
             out.flush();
+            System.out.println("Master sent request to MasterServer");
+            requestSocket.close(); // Close the request socket
 
-            while (true) {
-                String response = (String) in.readObject();
-                System.out.println("Master received from Reducer: " + response);
-                break;
-            }
-            socket.close();
+            // Now accept connection from ActionsForMaster
+            Socket responseSocket = masterReceiver.accept();
+            System.out.println("Master received connection from ActionsForMaster");
+
+            // Read response
+            ObjectInputStream in = new ObjectInputStream(responseSocket.getInputStream());
+            String response = (String) in.readObject();
+            System.out.println("Master received from ActionsForMaster: " + response);
+
+            // Close resources
+            in.close();
+            responseSocket.close();
+            masterReceiver.close();
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Master failed.");
             e.printStackTrace();
@@ -200,7 +230,7 @@ public class Master extends Thread {
         return categories;
     }
 
-    public void seeAvailableStores(double lon, double lat) {
+    public static void seeAvailableStores(double lon, double lat) {
         double x = lon - lat;
         int i = 0;for (Store store : myStores){
             i++;
@@ -210,8 +240,9 @@ public class Master extends Thread {
 
 
     public static void main(String[] args){
-        Master master = new Master();
-        master.start();
+        //Master master = new Master(23.333,21.2478);
+        //Master master = new Master();
+        //master.start();
 
         //master.read("src/main/resources");
         //System.out.println(myStores.get(0).isWithin5km(38.01, 23.74));

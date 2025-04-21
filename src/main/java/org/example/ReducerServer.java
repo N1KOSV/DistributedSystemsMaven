@@ -9,7 +9,6 @@ public class ReducerServer{
             System.out.println("Reducer Server is listening on port " + serverSocket.getLocalPort());
 
             while (true) {
-                System.out.println("Teach em young");
                 Socket socket = serverSocket.accept();
                 System.out.println("Reducer connected " + socket.getInetAddress());
 
