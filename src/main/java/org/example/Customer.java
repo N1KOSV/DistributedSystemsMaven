@@ -74,7 +74,7 @@ public class Customer extends Thread{
 		
 		int choice = scanner.nextInt();
 		while (choice != 5) {
-			if (choice == 1) {Master.seeAvailableStores(longitude, latitude);}
+			if (choice == 1) {Master.seeAvailableStores(longitude, latitude,9);}
 			else if (choice == 2) {
 				int filterChoice = -1;
 				while (filterChoice != 0) {

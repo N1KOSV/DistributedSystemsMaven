@@ -26,7 +26,7 @@ public class ActionsForMaster extends Thread {
 
                     ObjectOutputStream WorkerOut = new ObjectOutputStream(Workersocket.getOutputStream());
                     ObjectInputStream MasterIn = new ObjectInputStream(socket.getInputStream());
-                    WorkerOut.writeObject(MasterIn.readObject().toString());
+                    WorkerOut.writeObject(MasterIn.readObject());
                     WorkerOut.flush();
                     Workersocket.close();
                     socket.close();
@@ -43,8 +43,8 @@ public class ActionsForMaster extends Thread {
                 try {
                     // First receive data from Reducer
                     ObjectInputStream ReducerIn = new ObjectInputStream(socket.getInputStream());
-                    String received = (String) ReducerIn.readObject();
-                    System.out.println("ActionsForMaster received from Reducer: " + received);
+                    Store received = (Store) ReducerIn.readObject();
+                    System.out.println("ActionsForMaster received from Reducer: " + received.toString());
 
                     // Now connect to Master.java and forward the data
                     Socket masterSocket = new Socket("127.0.0.1", 5013);

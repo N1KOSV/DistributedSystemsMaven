@@ -33,8 +33,8 @@ public class Master extends Thread {
             Socket requestSocket = new Socket("127.0.0.1", 5012);
             ObjectOutputStream out = new ObjectOutputStream(requestSocket.getOutputStream());
             out.flush();
-            out.writeObject("Data_Data");
-            out.flush();
+                out.writeObject(myStores.getFirst());
+                out.flush();
             System.out.println("Master sent request to MasterServer");
             requestSocket.close(); // Close the request socket
 
@@ -44,7 +44,7 @@ public class Master extends Thread {
 
             // Read response
             ObjectInputStream in = new ObjectInputStream(responseSocket.getInputStream());
-            String response = (String) in.readObject();
+            Store response = (Store) in.readObject();
             System.out.println("Master received from ActionsForMaster: " + response);
 
             // Close resources
@@ -214,14 +214,13 @@ public class Master extends Thread {
     // Κάποιον τρόπο να προκύπτει το StoreID και το ProductID μέσω Hashing για να μπορώ να κρατάω το ποιό προϊόν κοιτάω
     // Κάποια λίστα στο Client.java ώστε να μπορώ να κρατάω κάθε πώληση ως kvp
     // ΝΔ πώς θα χρησιμοποιήσω mapReduce και για τί KVPs
-    
-    public void seeAllAvailableStores() {
-        int i = 0;for (Store store : myStores){
-            i++;
-        System.out.println(i + ". " + myStores.get(i-1).toString());
 
+    public void seeAllAvailableStores() {
+        for (int i = 0; i < myStores.size(); i++) {
+            System.out.println((i+1) + ". " + myStores.get(i).toString());
         }
     }
+    
     public static Set<String> getStoreCategories() {
         Set<String> categories = new HashSet<>();
         for (Store store : myStores) {
@@ -230,22 +229,23 @@ public class Master extends Thread {
         return categories;
     }
 
-    public static void seeAvailableStores(double lon, double lat) {
-        double x = lon - lat;
-        int i = 0;for (Store store : myStores){
-            i++;
-            System.out.println(i + ". " + myStores.get(i-1).toString());
+    public static void seeAvailableStores(double lon, double lat, int buckets) {
+        // Calculate distance or apply filters based on lon and lat if needed
+        for (int i = 0; i < myStores.size(); i++) {
+            System.out.println((i + 1) + ". " + myStores.get(i).toString() + " bucket: " + myStores.get(i).storeID % buckets);
         }
     }
 
 
-    public static void main(String[] args){
-        //Master master = new Master(23.333,21.2478);
+    public static void main(String[] args) throws IOException {
+        Master master = new Master(23.333,21.2478,false);
         //Master master = new Master();
         //master.start();
+        //int buckets = Integer.parseInt(args[0]);
 
-        //master.read("src/main/resources");
-        //System.out.println(myStores.get(0).isWithin5km(38.01, 23.74));
-
+        int buckets = 3;
+        master.read("src/main/resources");
+        master.seeAvailableStores(23.333,21.2478,buckets);
+        master.start();
     }
 }

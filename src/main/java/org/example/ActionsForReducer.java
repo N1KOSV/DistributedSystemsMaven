@@ -23,16 +23,13 @@ class ActionsForReducer extends Thread {
                 // Receive data from Worker
                 ObjectInputStream workerIn = new ObjectInputStream(socket.getInputStream());
                 //ObjectOutputStream WorkerOut = new ObjectOutputStream(socket.getOutputStream());
-                String receivedFromWorker = (String) workerIn.readObject();
+                Store receivedFromWorker = (Store) workerIn.readObject();
 
-                // Process data (reduce operation)
-                String reducedData = receivedFromWorker + " Processed from Reducer";
-                System.out.println(reducedData);
                 // Connect back to Master
                 Socket masterSocket = new Socket("127.0.0.2", 5012); // Use correct MasterServer port
                 System.out.println("Reducer: Connection received");
                 ObjectOutputStream out = new ObjectOutputStream(masterSocket.getOutputStream());
-                out.writeObject(reducedData); // Send something immediately
+                out.writeObject(receivedFromWorker); // Send something immediately
                 out.flush();
                 System.out.println("Reducer: Sent initial data");
 

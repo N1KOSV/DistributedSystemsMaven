@@ -22,28 +22,9 @@ public class MasterServer {
                 else{
                     Thread m = new ActionsForMaster(socket, "2");
                     m.start();
-                    /*
-                    try{
-                        ObjectInputStream ReducerIn = new ObjectInputStream(socket.getInputStream());
-                        ObjectOutputStream MasterOut = new ObjectOutputStream(socket.getOutputStream());
-                        MasterOut.flush();
-                        String received = (String) ReducerIn.readObject();
-                        ReducerIn.close();
-                        System.out.println("Master received from Reducer: " + received);
-                        MasterOut.writeObject(received);
-                        MasterOut.flush();
-                        MasterOut.close();
-                        socket.close();
-                    }
-                    catch(Exception e){
-                        System.out.println("Actions for master failed 2");
-                        e.printStackTrace();
-                    }
-                    */
                 }
             }
-        //} catch (IOException | ClassNotFoundException e) {
-        } catch (IOException /*| ClassNotFoundException*/ e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
