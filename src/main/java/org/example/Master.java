@@ -10,16 +10,18 @@ public class Master extends Thread {
         try {
             Socket socket = new Socket("127.0.0.1", 5012);
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            //ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
             out.flush();
             out.writeObject("Data_Data");
             out.flush();
 
-            //String response = (String) in.readObject();
-            //System.out.println("Master received from Reducer: " + response);
-
+            while (true) {
+                String response = (String) in.readObject();
+                System.out.println("Master received from Reducer: " + response);
+                break;
+            }
             socket.close();
-        } catch (IOException /*| ClassNotFoundException*/ e) {
+        } catch (IOException | ClassNotFoundException e) {
             System.out.println("Master failed.");
             e.printStackTrace();
         }

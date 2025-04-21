@@ -22,9 +22,7 @@ public class ActionsForMaster extends Thread {
         while (running) {
             if (situation.equals("1")) {
                 try {
-                    //WorkerServer S1 = new WorkerServer(5001);
                     Socket Workersocket = new Socket("127.0.0.1", 5001);
-                    //S1.openServer();
 
                     ObjectOutputStream WorkerOut = new ObjectOutputStream(Workersocket.getOutputStream());
                     ObjectInputStream MasterIn = new ObjectInputStream(socket.getInputStream());
@@ -45,8 +43,12 @@ public class ActionsForMaster extends Thread {
         else{
                 try{
                     ObjectInputStream ReducerIn = new ObjectInputStream(socket.getInputStream());
+                    ObjectOutputStream MasterOut = new ObjectOutputStream(socket.getOutputStream());
                     String received = (String) ReducerIn.readObject();
                     System.out.println("Master received from Reducer: " + received);
+                    MasterOut.writeObject(received);
+                    MasterOut.flush();
+                    MasterOut.close();
                     socket.close();
                     stopThread();
                 }

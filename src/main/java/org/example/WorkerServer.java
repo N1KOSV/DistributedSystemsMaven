@@ -7,9 +7,6 @@ public class WorkerServer{
     
     int number;
     
-    public WorkerServer(int number){
-        this.number = number;
-    }
     
     void openServer () {
         try (ServerSocket serverSocket = new ServerSocket(5001)) {
@@ -18,15 +15,14 @@ public class WorkerServer{
             while (true) {
                 Socket socket = serverSocket.accept();
                 System.out.println("Worker connected" + socket.getInetAddress());
-
-                Thread w1 = new ActionsForWorker(new Socket("127.0.0.1", 5005));
+                Thread w1 = new ActionsForWorker(socket);
                 w1.start();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    /*public static void main(String [] args){
-        new WorkerServer(number).openServer();
-    }*/
+    public static void main(String [] args){
+        new WorkerServer().openServer();
+    }
 }

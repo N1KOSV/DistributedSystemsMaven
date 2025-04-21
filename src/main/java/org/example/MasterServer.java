@@ -22,6 +22,7 @@ public class MasterServer {
                 else{
                     Thread m = new ActionsForMaster(socket, "2");
                     m.start();
+                    
                 }
                 //ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 //String msg = (String) in.readObject();
