@@ -13,8 +13,8 @@ public class Master extends Thread {
     int userId;
     static int nrUsers = 0;
     boolean isAdmin;
-    
-    
+
+
     public Master(double longitude, double latitude, boolean isAdmin) {
         this.longitude = longitude;
         this.latitude = latitude;
@@ -23,39 +23,61 @@ public class Master extends Thread {
         userId = nrUsers;
     }
 
+    @Override
     public void run() {
         try {
-            // Create a ServerSocket to receive data from ActionsForMaster
-            ServerSocket masterReceiver = new ServerSocket(5013); // Use a different port
-            System.out.println("Master waiting for response on port 5013");
-
-            // Send request to MasterServer to start the process
+            // Step 1: Connect to MasterServer and send Store
             Socket requestSocket = new Socket("127.0.0.1", 5012);
+            
             ObjectOutputStream out = new ObjectOutputStream(requestSocket.getOutputStream());
             out.flush();
-                out.writeObject(myStores.getFirst());
-                out.flush();
-            System.out.println("Master sent request to MasterServer");
-            requestSocket.close(); // Close the request socket
+            for (Store store : myStores){out.writeObject(store);}
+            System.out.println("Master sent Store to MasterServer");
 
-            // Now accept connection from ActionsForMaster
+            // Step 2: Open ServerSocket to accept response from ActionsForMaster
+            ServerSocket masterReceiver = new ServerSocket(5013);
             Socket responseSocket = masterReceiver.accept();
-            System.out.println("Master received connection from ActionsForMaster");
+            System.out.println("Master accepted connection from ActionsForMaster");
 
-            // Read response
+            // Step 3: Receive the processed Store
             ObjectInputStream in = new ObjectInputStream(responseSocket.getInputStream());
-            Store response = (Store) in.readObject();
-            System.out.println("Master received from ActionsForMaster: " + response);
+            Object receivedObject = in.readObject();
+            if (receivedObject instanceof Store storeResponse) {
+                System.out.println("Master received processed Store: " + storeResponse);
+            } else {
+                System.out.println("Master received unexpected object: " + receivedObject.getClass().getSimpleName());
+            }
 
-            // Close resources
+            // Step 4: Send acknowledgment back
+            ObjectOutputStream ackOut = new ObjectOutputStream(responseSocket.getOutputStream());
+            out.flush();
+            out.writeObject("PROCESS");
+            out.flush();
+            System.out.println("Master sent acknowledgment");
+
+            // Step 5: Wait for final confirmation from ActionsForMaster
+            System.out.println("Waiting for final confirmation...");
+            //ObjectInputStream finalIn = new ObjectInputStream(responseSocket.getInputStream());
+            Object finalResponse = in.readObject();
+            System.out.println("Master received acknowledgment response: " + finalResponse);
+            // Add timeout or loop in case EOFException occurs
+            
+            // Cleanup
             in.close();
+            //finalIn.close();
             responseSocket.close();
+            ackOut.close();
+
+            requestSocket.close();
             masterReceiver.close();
+
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Master failed.");
+            System.out.println("Master run failed.");
             e.printStackTrace();
         }
     }
+
+
 
     static List<Store> myStores = new ArrayList<Store>();
 
@@ -98,23 +120,36 @@ public class Master extends Thread {
         Scanner scanner = new Scanner(System.in);
         int i = 1;
         myStores.sort(Comparator.comparingInt(Store::getStoreID));
-        for (Store store : myStores) {System.out.println(i + ". " + store.name);i++;}
+        for (Store store : myStores) {
+            System.out.println(i + ". " + store.name);
+            i++;
+        }
         System.out.println("Which store would you like to edit?");
         int answer = Integer.parseInt(scanner.nextLine());
         //parser parser = new parser("src/main/resources/Store"+answer+".json");
-        System.out.println("What do you want to edit?");System.out.println("1. Add a new product");System.out.println("2. Edit a product quantity");
+        System.out.println("What do you want to edit?");
+        System.out.println("1. Add a new product");
+        System.out.println("2. Edit a product quantity");
         int answer2 = Integer.parseInt(scanner.nextLine());
         if (answer2 == 1) {
-            System.out.println("Enter the product name");String productName = scanner.nextLine();System.out.println("Enter the product type");String productType = scanner.nextLine();System.out.println("Enter the product price");String productPrice = scanner.nextLine();System.out.println("Enter the product amount");String productAmount = scanner.nextLine();
-            myStores.get(answer - 1).addProduct(productName,productType,Integer.parseInt(productAmount),Double.parseDouble(productPrice));}
+            System.out.println("Enter the product name");
+            String productName = scanner.nextLine();
+            System.out.println("Enter the product type");
+            String productType = scanner.nextLine();
+            System.out.println("Enter the product price");
+            String productPrice = scanner.nextLine();
+            System.out.println("Enter the product amount");
+            String productAmount = scanner.nextLine();
+            myStores.get(answer - 1).addProduct(productName, productType, Integer.parseInt(productAmount), Double.parseDouble(productPrice));
+        }
         //parser.addProductJson(new String[] {productName, productType, productPrice, productAmount});}
         else if (answer2 == 2) {
             for (Product product : myStores.get(answer - 1).getProducts()) System.out.println(product.getName());
             answer2 = Integer.parseInt(scanner.nextLine());
             System.out.println("How much of this item is in stock?");
             int answer3 = Integer.parseInt(scanner.nextLine());
-            myStores.get(answer - 1).products.get(answer2-1).setAmount(answer3);}
-        else if (answer2 == 3) {
+            myStores.get(answer - 1).products.get(answer2 - 1).setAmount(answer3);
+        } else if (answer2 == 3) {
             i = 0;
             for (Product product : myStores.get(answer - 1).getProducts()) {
                 i++;
@@ -125,7 +160,7 @@ public class Master extends Thread {
         }
         //parser.changeAvailableAmount("src/main/resources/Store" + answer + ".json", myStores.get(answer - 1).products.get(answer2 - 1).getName(), answer3); }
     }
-    
+
     public void sell() {
         Scanner scanner = new Scanner(System.in);
         int i = 1;
@@ -151,7 +186,6 @@ public class Master extends Thread {
     }
 
 
-
     public void newStore(Scanner scanner) throws IOException {
         System.out.println("Enter the name of the store");
         String storeName = scanner.nextLine();
@@ -169,7 +203,7 @@ public class Master extends Thread {
         String storeLogo = scanner.nextLine();
         boolean moreProducts = true;
         int nrProducts = 0;
-        Store myStore = new Store(storeName,Double.valueOf(storeLat),Double.valueOf(storeLon),storeType,Double.valueOf(storeStars),Integer.parseInt(storeRatings),storeLogo,myStores.size());
+        Store myStore = new Store(storeName, Double.valueOf(storeLat), Double.valueOf(storeLon), storeType, Double.valueOf(storeStars), Integer.parseInt(storeRatings), storeLogo, myStores.size());
         myStores.add(myStore);
         while (moreProducts) {
             nrProducts++;
@@ -182,23 +216,24 @@ public class Master extends Thread {
             System.out.println("Enter the product amount");
             String productAmount = scanner.nextLine();
             System.out.println("Is there another product? \n Y: Yes\n N: No");
-            if (nrProducts == 1){
-                myStore.addProduct(productName,productType,Integer.parseInt(productAmount),Double.parseDouble(productPrice));
+            if (nrProducts == 1) {
+                myStore.addProduct(productName, productType, Integer.parseInt(productAmount), Double.parseDouble(productPrice));
                 //parser parser = new parser("src/main/resources/Store"+ (myStores.size() + 1 )+".json");
                 //parser.createJsonFile("src/main/resources/Store"+ (myStores.size() + 1 )+".json",storeName,Double.valueOf(storeLat),Double.valueOf(storeLon),storeType,Double.valueOf(storeStars),Integer.parseInt(storeRatings),storeLogo,new String[][] {{productName, productType, productAmount, productPrice}});
-            }
-            else{
-                myStore.addProduct(productName,productType,Integer.parseInt(productAmount),Double.parseDouble(productPrice));
+            } else {
+                myStore.addProduct(productName, productType, Integer.parseInt(productAmount), Double.parseDouble(productPrice));
                 //parser.addProductJson(new String[] {productName, productType, productAmount, productPrice});
             }
-            if (scanner.nextLine().equals("N")) {moreProducts = false;}
+            if (scanner.nextLine().equals("N")) {
+                moreProducts = false;
+            }
         }
-        int i =0;
-        
+        int i = 0;
+
         //read("src/main/resources");
         for (Store store : myStores) {
             i++;
-            System.out.println(i + ". " + store.toString() + " - " + myStores.get(i-1).products.size());
+            System.out.println(i + ". " + store.toString() + " - " + myStores.get(i - 1).products.size());
         }
     }
 
@@ -207,7 +242,7 @@ public class Master extends Thread {
     //Ανοιχτό κανάλι για επικοινωνία από χρήστες
     //Επεξεργασία αιτημάτων χρήστη και προσθήκη φίλτρων
     //Επιστροφή καταστημάτων στον χρήστη βάσει της τοποθεσίας του
-    
+
     // Όχι τόσες αλλαγές στο json
     // Να φτιάξω αντικείμενα για κάθε μαγαζί και να τα περνάω
     // int για τις πωλήσεις του κάθε προϊόντος
@@ -217,10 +252,10 @@ public class Master extends Thread {
 
     public void seeAllAvailableStores() {
         for (int i = 0; i < myStores.size(); i++) {
-            System.out.println((i+1) + ". " + myStores.get(i).toString());
+            System.out.println((i + 1) + ". " + myStores.get(i).toString());
         }
     }
-    
+
     public static Set<String> getStoreCategories() {
         Set<String> categories = new HashSet<>();
         for (Store store : myStores) {
@@ -237,15 +272,15 @@ public class Master extends Thread {
     }
 
 
-    public static void main(String[] args) throws IOException {
-        Master master = new Master(23.333,21.2478,false);
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+        Master master = new Master(23.333, 21.2478, false);
         //Master master = new Master();
         //master.start();
         //int buckets = Integer.parseInt(args[0]);
 
         int buckets = 3;
         master.read("src/main/resources");
-        master.seeAvailableStores(23.333,21.2478,buckets);
+        master.seeAvailableStores(23.333, 21.2478, buckets);
         master.start();
     }
 }

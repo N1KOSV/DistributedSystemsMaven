@@ -7,13 +7,13 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WorkerServer {
+public class WorkerServer3 {
 
     static List<Store> myStores = new ArrayList<>();
     int number = 0;
 
     void openServer() {
-        try (ServerSocket serverSocket = new ServerSocket(5014)) {
+        try (ServerSocket serverSocket = new ServerSocket(5016)) {
             System.out.println("Worker Server is listening on port " + serverSocket.getLocalPort());
 
             while (true) {
@@ -41,7 +41,7 @@ public class WorkerServer {
                     m.start();
                 } else if (received instanceof String) {
                     String message = (String) received;
-                    System.out.println("Received message: " + message);
+                    //System.out.println("Received message: " + message);
                     Thread m = new ActionsForWorker(message);
                     m.start();
                     if (message.equalsIgnoreCase("PROCESS")) {
@@ -63,6 +63,6 @@ public class WorkerServer {
     }
 
     public static void main(String[] args) {
-        new WorkerServer().openServer();
+        new WorkerServer3().openServer();
     }
 }
