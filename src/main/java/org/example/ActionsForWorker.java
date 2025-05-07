@@ -8,6 +8,7 @@ import java.util.List;
 class ActionsForWorker extends Thread {
     static List<Store> myStores;
     static String command = "";
+    
     public ActionsForWorker(List<Store> myStores) {
         this.myStores = myStores;
     }
@@ -23,8 +24,8 @@ class ActionsForWorker extends Thread {
     public void printStores() {
         if(!myStores.isEmpty()) {
             System.out.println(myStores.size());
-            System.out.println(myStores.getLast());
-            System.out.println(myStores.getFirst());
+            //System.out.println(myStores.getLast());
+            //System.out.println(myStores.getFirst());
         }
     }
     
@@ -36,15 +37,15 @@ class ActionsForWorker extends Thread {
                 
                 if (!command.equals("")) {Socket reducerSocket = new Socket("127.0.0.2", 5002);
                     ObjectOutputStream reducerOut = new ObjectOutputStream(reducerSocket.getOutputStream());
-                    reducerOut.writeObject(command);
-                    reducerOut.flush();}
+                    reducerOut.writeObject(myStores.getFirst());
+                    reducerOut.flush();reducerSocket.close();}
                 else{Socket reducerSocket = new Socket("127.0.0.2", 5002);
                     ObjectOutputStream reducerOut = new ObjectOutputStream(reducerSocket.getOutputStream());
-                    reducerOut.writeObject(command);
-                    reducerOut.flush();}
+                    reducerOut.writeObject(myStores.getFirst());
+                    reducerOut.flush();reducerSocket.close();}
                 i++;
 
-                //socket.close();
+                
                 printStores();
                 stopThread();
 

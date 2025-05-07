@@ -46,6 +46,7 @@ public class WorkerServer {
                     m.start();
                     if (message.equalsIgnoreCase("PROCESS")) {
                         // Start processing the list (e.g., launch thread)
+                        System.out.println("Shout");
                         new ActionsForWorker(myStores).start();
                     } else if (message.equalsIgnoreCase("RESET")) {
                         myStores.clear();

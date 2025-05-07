@@ -22,60 +22,47 @@ public class Master extends Thread {
         this.isAdmin = isAdmin;
         userId = nrUsers;
     }
-
+    
     @Override
     public void run() {
-        try {
-            // Step 1: Connect to MasterServer and send Store
-            Socket requestSocket = new Socket("127.0.0.1", 5012);
-            
-            ObjectOutputStream out = new ObjectOutputStream(requestSocket.getOutputStream());
+        try (
+                Socket socket = new Socket("127.0.0.1", 5012);  // MasterServer
+
+        ) {
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
             out.flush();
-            for (Store store : myStores){out.writeObject(store);}
+
+            // Step 1: Send Store to MasterServer
+            for (Store store : myStores) {
+                out.writeObject(store);
+                out.flush();
+            }
             System.out.println("Master sent Store to MasterServer");
 
-            // Step 2: Open ServerSocket to accept response from ActionsForMaster
-            ServerSocket masterReceiver = new ServerSocket(5013);
-            Socket responseSocket = masterReceiver.accept();
-            System.out.println("Master accepted connection from ActionsForMaster");
-
-            // Step 3: Receive the processed Store
-            ObjectInputStream in = new ObjectInputStream(responseSocket.getInputStream());
+            // Step 2: Wait for processed Store (relayed from ActionsForMaster)
             Object receivedObject = in.readObject();
             if (receivedObject instanceof Store storeResponse) {
                 System.out.println("Master received processed Store: " + storeResponse);
             } else {
-                System.out.println("Master received unexpected object: " + receivedObject.getClass().getSimpleName());
+                System.out.println("Unexpected object: " + receivedObject.getClass().getSimpleName());
             }
 
-            // Step 4: Send acknowledgment back
-            ObjectOutputStream ackOut = new ObjectOutputStream(responseSocket.getOutputStream());
-            out.flush();
+            // Step 3: Send acknowledgment back to MasterServer
             out.writeObject("PROCESS");
             out.flush();
             System.out.println("Master sent acknowledgment");
 
-            // Step 5: Wait for final confirmation from ActionsForMaster
-            System.out.println("Waiting for final confirmation...");
-            //ObjectInputStream finalIn = new ObjectInputStream(responseSocket.getInputStream());
+            // Step 4: Wait for final confirmation (optional)
             Object finalResponse = in.readObject();
-            System.out.println("Master received acknowledgment response: " + finalResponse);
-            // Add timeout or loop in case EOFException occurs
-            
-            // Cleanup
-            in.close();
-            //finalIn.close();
-            responseSocket.close();
-            ackOut.close();
-
-            requestSocket.close();
-            masterReceiver.close();
+            System.out.println("Final confirmation from MasterServer: " + finalResponse);
 
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Master run failed.");
             e.printStackTrace();
         }
     }
+
 
 
 

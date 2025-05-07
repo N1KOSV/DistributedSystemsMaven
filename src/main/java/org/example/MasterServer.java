@@ -2,6 +2,7 @@ package org.example;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -18,9 +19,7 @@ public class MasterServer {
                 Socket socket = serverSocket.accept();
                 String clientAddress = socket.getInetAddress().getHostAddress();
                 System.out.println("Connection #" + number + " from " + clientAddress);
-
                 String tag = clientAddress.endsWith("1") ? "1" : "2";
-
                 new Thread(() -> handleClient(socket, tag)).start();
             }
 
@@ -30,14 +29,15 @@ public class MasterServer {
     }
 
     private void handleClient(Socket socket, String tag) {
-        try (ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
+        try (ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
             Object received;
 
             while ((received = in.readObject()) != null) {
                 System.out.println("Received object: " + received.getClass().getSimpleName());
 
                 // Pass the received object and situation to a new thread
-                Thread actionThread = new ActionsForMaster(received, tag);
+                Thread actionThread = new ActionsForMaster(received, tag, socket);
                 actionThread.start();
             }
 
