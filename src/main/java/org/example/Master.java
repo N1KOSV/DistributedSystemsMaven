@@ -7,25 +7,25 @@ import java.util.*;
 
 public class Master extends Thread {
 
-//    void openServer () {
-//        try (ServerSocket serverSocket = new ServerSocket(5000)) {
-//            System.out.println("Master Server is listening on port " + serverSocket.getLocalPort());
-//
-//            while (true) {
-//                Socket socket = serverSocket.accept();
-//                System.out.println("Master connected" + socket.getInetAddress());
-//
-//                Thread m = new ActionsForMaster(socket);
-//                m.start();
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    void openServer () {
+        try (ServerSocket serverSocket = new ServerSocket(5000)) {
+            System.out.println("Master Server is listening on port " + serverSocket.getLocalPort());
+
+            while (true) {
+                Socket socket = serverSocket.accept();
+                System.out.println("Master connected" + socket.getInetAddress());
+
+                Thread m = new ActionsForMaster(socket);
+                m.start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void run() {
         try {
-             Socket socket = new Socket("127.0.0.1", 5000);
+             Socket socket = new Socket("127.0.0.1", 5001);
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
@@ -224,9 +224,11 @@ public class Master extends Thread {
     }
 
 
-    public static void main(String[] args){
-//        Master masterServer = new Master();
-//        new Thread(masterServer::openServer).start();
+    public static void main(String[] args) throws InterruptedException {
+        Master masterServer = new Master();
+        new Thread(masterServer::openServer).start();
+        Thread.sleep(1000);
+        System.out.println("Enter the name of the store");
 
         Master master = new Master();
         master.start();
