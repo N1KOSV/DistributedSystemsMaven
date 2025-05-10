@@ -6,14 +6,11 @@ import java.net.Socket;
 import java.util.*;
 
 public class Master extends Thread {
-
-
     double latitude;
     double longitude;
     int userId;
     static int nrUsers = 0;
     boolean isAdmin;
-
 
     public Master(double longitude, double latitude, boolean isAdmin) {
         this.longitude = longitude;
@@ -22,12 +19,11 @@ public class Master extends Thread {
         this.isAdmin = isAdmin;
         userId = nrUsers;
     }
-    
+
     @Override
     public void run() {
         try (
                 Socket socket = new Socket("127.0.0.1", 5012);  // MasterServer
-
         ) {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
@@ -40,22 +36,30 @@ public class Master extends Thread {
             }
             System.out.println("Master sent Store to MasterServer");
 
-            // Step 2: Wait for processed Store (relayed from ActionsForMaster)
-            Object receivedObject = in.readObject();
-            if (receivedObject instanceof Store storeResponse) {
-                System.out.println("Master received processed Store: " + storeResponse);
-            } else {
-                System.out.println("Unexpected object: " + receivedObject.getClass().getSimpleName());
-            }
-
-            // Step 3: Send acknowledgment back to MasterServer
+            // Step 2: Send acknowledgment to MasterServer to start processing
             out.writeObject("PROCESS");
             out.flush();
-            System.out.println("Master sent acknowledgment");
+            System.out.println("Master sent PROCESS command");
 
-            // Step 4: Wait for final confirmation (optional)
-            Object finalResponse = in.readObject();
-            System.out.println("Final confirmation from MasterServer: " + finalResponse);
+            // Step 3: Set up a loop to continuously read responses
+            try {
+                while (true) {
+                    Object receivedObject = in.readObject();
+                    if (receivedObject != null) {
+                        // Print all messages received from MasterServer
+                        System.out.println("Master received from MasterServer: " + receivedObject);
+
+                        // Process based on object type if needed
+                        if (receivedObject instanceof Store) {
+                            Store storeResponse = (Store) receivedObject;
+                            System.out.println("Processed store: " + storeResponse.name);
+                        }
+                    }
+                }
+            } catch (EOFException e) {
+                // This is normal when the socket is closed
+                System.out.println("Connection closed by MasterServer");
+            }
 
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Master run failed.");
@@ -63,9 +67,7 @@ public class Master extends Thread {
         }
     }
 
-
-
-
+    // Rest of the Master class remains unchanged
     static List<Store> myStores = new ArrayList<Store>();
 
     public static void read(String path) throws IOException {
@@ -102,7 +104,6 @@ public class Master extends Thread {
         }
     }
 
-
     public void editStore() {
         Scanner scanner = new Scanner(System.in);
         int i = 1;
@@ -113,7 +114,6 @@ public class Master extends Thread {
         }
         System.out.println("Which store would you like to edit?");
         int answer = Integer.parseInt(scanner.nextLine());
-        //parser parser = new parser("src/main/resources/Store"+answer+".json");
         System.out.println("What do you want to edit?");
         System.out.println("1. Add a new product");
         System.out.println("2. Edit a product quantity");
@@ -129,7 +129,6 @@ public class Master extends Thread {
             String productAmount = scanner.nextLine();
             myStores.get(answer - 1).addProduct(productName, productType, Integer.parseInt(productAmount), Double.parseDouble(productPrice));
         }
-        //parser.addProductJson(new String[] {productName, productType, productPrice, productAmount});}
         else if (answer2 == 2) {
             for (Product product : myStores.get(answer - 1).getProducts()) System.out.println(product.getName());
             answer2 = Integer.parseInt(scanner.nextLine());
@@ -145,7 +144,6 @@ public class Master extends Thread {
             answer2 = Integer.parseInt(scanner.nextLine());
             myStores.get(answer - 1).products.get(answer2 - 1).setAmount(-1);
         }
-        //parser.changeAvailableAmount("src/main/resources/Store" + answer + ".json", myStores.get(answer - 1).products.get(answer2 - 1).getName(), answer3); }
     }
 
     public void sell() {
@@ -171,7 +169,6 @@ public class Master extends Thread {
             i++;
         }
     }
-
 
     public void newStore(Scanner scanner) throws IOException {
         System.out.println("Enter the name of the store");
@@ -205,11 +202,8 @@ public class Master extends Thread {
             System.out.println("Is there another product? \n Y: Yes\n N: No");
             if (nrProducts == 1) {
                 myStore.addProduct(productName, productType, Integer.parseInt(productAmount), Double.parseDouble(productPrice));
-                //parser parser = new parser("src/main/resources/Store"+ (myStores.size() + 1 )+".json");
-                //parser.createJsonFile("src/main/resources/Store"+ (myStores.size() + 1 )+".json",storeName,Double.valueOf(storeLat),Double.valueOf(storeLon),storeType,Double.valueOf(storeStars),Integer.parseInt(storeRatings),storeLogo,new String[][] {{productName, productType, productAmount, productPrice}});
             } else {
                 myStore.addProduct(productName, productType, Integer.parseInt(productAmount), Double.parseDouble(productPrice));
-                //parser.addProductJson(new String[] {productName, productType, productAmount, productPrice});
             }
             if (scanner.nextLine().equals("N")) {
                 moreProducts = false;
@@ -217,25 +211,11 @@ public class Master extends Thread {
         }
         int i = 0;
 
-        //read("src/main/resources");
         for (Store store : myStores) {
             i++;
             System.out.println(i + ". " + store.toString() + " - " + myStores.get(i - 1).products.size());
         }
     }
-
-    //Παραλαβή objects product & store
-    //Διεπαφή (Console) με τις δυνατότητες του manager
-    //Ανοιχτό κανάλι για επικοινωνία από χρήστες
-    //Επεξεργασία αιτημάτων χρήστη και προσθήκη φίλτρων
-    //Επιστροφή καταστημάτων στον χρήστη βάσει της τοποθεσίας του
-
-    // Όχι τόσες αλλαγές στο json
-    // Να φτιάξω αντικείμενα για κάθε μαγαζί και να τα περνάω
-    // int για τις πωλήσεις του κάθε προϊόντος
-    // Κάποιον τρόπο να προκύπτει το StoreID και το ProductID μέσω Hashing για να μπορώ να κρατάω το ποιό προϊόν κοιτάω
-    // Κάποια λίστα στο Client.java ώστε να μπορώ να κρατάω κάθε πώληση ως kvp
-    // ΝΔ πώς θα χρησιμοποιήσω mapReduce και για τί KVPs
 
     public void seeAllAvailableStores() {
         for (int i = 0; i < myStores.size(); i++) {
@@ -258,13 +238,8 @@ public class Master extends Thread {
         }
     }
 
-
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         Master master = new Master(23.333, 21.2478, false);
-        //Master master = new Master();
-        //master.start();
-        //int buckets = Integer.parseInt(args[0]);
-
         int buckets = 3;
         master.read("src/main/resources");
         master.seeAvailableStores(23.333, 21.2478, buckets);

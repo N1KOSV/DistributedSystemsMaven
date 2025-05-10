@@ -20,7 +20,7 @@ class ActionsForWorker extends Thread {
     public void stopThread() {
         running = false;
     }
-    
+
     public void printStores() {
         if(!myStores.isEmpty()) {
             System.out.println(myStores.size());
@@ -34,12 +34,13 @@ class ActionsForWorker extends Thread {
         int i = 0;
         while (running) {
             try {
-                
-                if (!command.equals("")) {Socket reducerSocket = new Socket("127.0.0.2", 5002);
+                if (command.equals("")) {Socket reducerSocket = new Socket("127.0.0.2", 5002);
                     ObjectOutputStream reducerOut = new ObjectOutputStream(reducerSocket.getOutputStream());
                     reducerOut.writeObject(myStores.getFirst());
                     reducerOut.flush();reducerSocket.close();}
                 else{Socket reducerSocket = new Socket("127.0.0.2", 5002);
+                    System.out.println("Σπάω με την Visa, ρουφάω από το πενηντάρι");
+                    System.out.println(command);
                     ObjectOutputStream reducerOut = new ObjectOutputStream(reducerSocket.getOutputStream());
                     reducerOut.writeObject(myStores.getFirst());
                     reducerOut.flush();reducerSocket.close();}

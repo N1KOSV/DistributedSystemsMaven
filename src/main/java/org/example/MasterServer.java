@@ -19,7 +19,12 @@ public class MasterServer {
                 Socket socket = serverSocket.accept();
                 String clientAddress = socket.getInetAddress().getHostAddress();
                 System.out.println("Connection #" + number + " from " + clientAddress);
+
+                // Determine client type by IP - this logic might need adjustment depending on your network
                 String tag = clientAddress.endsWith("1") ? "1" : "2";
+                System.out.println("Client identified as type: " + tag);
+
+                // Start a dedicated thread for this client
                 new Thread(() -> handleClient(socket, tag)).start();
             }
 
@@ -29,20 +34,48 @@ public class MasterServer {
     }
 
     private void handleClient(Socket socket, String tag) {
-        try (ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+        try {
+            // Important: create output stream first to avoid blocking issues
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            out.flush();
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+
             Object received;
+            System.out.println("Ready to receive objects from client " + tag);
 
             while ((received = in.readObject()) != null) {
-                System.out.println("Received object: " + received.getClass().getSimpleName());
+                System.out.println("Received object: " + received.getClass().getSimpleName() +
+                        " from client type: " + tag);
 
-                // Pass the received object and situation to a new thread
-                Thread actionThread = new ActionsForMaster(received, tag, socket);
+                // Pass the received object and situation to a new thread for processing
+                ActionsForMaster actionThread = new ActionsForMaster(received, tag, socket);
                 actionThread.start();
+
+                // For debugging: print when the action thread is started
+                System.out.println("Started processing thread for: " + received.getClass().getSimpleName());
+
+                // If it's a command like "PROCESS", send acknowledgment back to Master
+                if (received instanceof String && ((String)received).equals("PROCESS")) {
+                    // Wait briefly for worker processing to start
+                    Thread.sleep(500);
+
+                    // Send acknowledgment
+                    out.writeObject((String)received);
+                    out.flush();
+                    System.out.println("Sent acknowledgment back to Master");
+                }
             }
 
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException | InterruptedException e) {
             System.out.println("Client disconnected or error: " + e.getMessage());
+        } finally {
+            try {
+                if (!socket.isClosed()) {
+                    socket.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

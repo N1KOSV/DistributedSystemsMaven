@@ -37,8 +37,8 @@ public class WorkerServer2 {
                     Store store = (Store) received;
                     //System.out.println("Received Store: " + store);
                     myStores.add(store);
-                    Thread m = new ActionsForWorker(myStores);
-                    m.start();
+                    //Thread m = new ActionsForWorker(myStores);
+                    //m.start();
                 } else if (received instanceof String) {
                     String message = (String) received;
                     //System.out.println("Received message: " + message);

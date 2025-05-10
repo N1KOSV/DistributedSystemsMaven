@@ -9,6 +9,12 @@ public class ActionsForMaster extends Thread {
     private final String situation;
     private final Socket socket;
 
+    private volatile boolean running = true;
+
+    public void stopThread() {
+        running = false;
+    }
+
     public ActionsForMaster(Object receivedObject, String situation, Socket socket) {
         this.receivedObject = receivedObject;
         this.situation = situation;
@@ -41,8 +47,9 @@ public class ActionsForMaster extends Thread {
                     out.flush();
 
                     System.out.println("Sent to Worker: " + receivedObject.getClass().getSimpleName());
-                workerSocket.close();}
-                else{
+                    workerSocket.close();
+                    stopThread();
+                } else {
                     Socket workerSocket1 = new Socket("127.0.0.1", 5014);
                     Socket workerSocket2 = new Socket("127.0.0.1", 5015);
                     Socket workerSocket3 = new Socket("127.0.0.1", 5016);
@@ -51,32 +58,48 @@ public class ActionsForMaster extends Thread {
                     ObjectOutputStream out3 = new ObjectOutputStream(workerSocket3.getOutputStream());
 
                     out1.writeObject(receivedObject);
-                    out1.flush();         
+                    out1.flush();
                     out2.writeObject(receivedObject);
-                    out2.flush();         
+                    out2.flush();
                     out3.writeObject(receivedObject);
                     out3.flush();
                     System.out.println("Sent to WorkerS: " + receivedObject.getClass().getSimpleName());
+
+                    // Close all worker sockets
+                    workerSocket1.close();
+                    workerSocket2.close();
+                    workerSocket3.close();
+                    stopThread();
                 }
             } catch (IOException e) {
                 System.out.println("Failed to send to worker");
                 e.printStackTrace();
             }
 
-        } else { // situation "2"
-                try {
-                    //Socket masterSocket = new Socket("127.0.0.1", 5013);
+        } else { // situation "2" - handling data from Reducer back to Master
+            try {
+                // Make sure we have a valid socket and it's open
+                if (socket != null && !socket.isClosed()) {
+                    // Create new output stream for the existing socket if needed
+                    // This is important because we're writing back to the original connection
                     ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                     out.flush();
+
+                    // Write the object back to the client (Master)
                     out.writeObject(receivedObject);
                     out.flush();
+
                     System.out.println("Forwarded to Master from Reducer: " + receivedObject);
 
-                    //masterSocket.close();
-                } catch (IOException e) {
-                    System.out.println("Failed to forward to Master");
-                    e.printStackTrace();
+                    // Don't close the socket here - let the MasterServer handle that
+                } else {
+                    System.out.println("Error: Socket is null or closed, cannot forward to Master");
                 }
+                stopThread();
+            } catch (IOException e) {
+                System.out.println("Failed to forward to Master");
+                e.printStackTrace();
+            }
         }
     }
 }
