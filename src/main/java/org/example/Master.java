@@ -26,52 +26,91 @@ public class Master extends Thread {
                 Socket socket = new Socket("127.0.0.1", 5012);  // MasterServer
         ) {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
             out.flush();
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
             // Step 1: Send Store to MasterServer
             for (Store store : myStores) {
                 out.writeObject(store);
                 out.flush();
+                System.out.println("Sent store: " + store.name);
             }
             System.out.println("Master sent Store to MasterServer");
 
             // Step 2: Send acknowledgment to MasterServer to start processing
             out.writeObject("Lat: " + String.valueOf(latitude));
             out.flush();
-            out.writeObject("Lon: " +String.valueOf(longitude));
+            out.writeObject("Lon: " + String.valueOf(longitude));
             out.flush();
             out.writeObject("send");
+            out.flush();
             System.out.println("Master sent PROCESS command");
 
             // Step 3: Set up a loop to continuously read responses
             try {
+                // This approach handles both ObjectInputStream and the modified approach
+                // from ActionsForMaster where we're sending data with DataOutputStream
+                DataInputStream dataIn = new DataInputStream(socket.getInputStream());
+
                 while (true) {
-                    Object receivedObject = in.readObject();
-                    if (receivedObject != null) {
-                        // Print all messages received from MasterServer
-                        if (receivedObject instanceof String) {
-                            System.out.println("Master received from MasterServer: " + receivedObject);
+                    try {
+                        // Check if there's data available
+                        if (dataIn.available() > 0) {
+                            // Try to read object size and then the object
+                            int dataLength = dataIn.readInt();
+                            byte[] data = new byte[dataLength];
+                            dataIn.readFully(data);
+
+                            // Deserialize the object
+                            ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(data));
+                            Object receivedObject = objIn.readObject();
+
+                            // Process the received object
+                            if (receivedObject instanceof String) {
+                                System.out.println("Master received from MasterServer: " + receivedObject);
+                            } else if (receivedObject instanceof Store) {
+                                Store storeResponse = (Store) receivedObject;
+                                System.out.println("Processed store: " + storeResponse.name);
+                            }
+                        } else {
+                            // No data available, sleep briefly to avoid CPU spinning
+                            Thread.sleep(100);
                         }
-                        // Process based on object type if needed
-                        else if (receivedObject instanceof Store) {
-                            Store storeResponse = (Store) receivedObject;
-                            System.out.println("Processed store: " + storeResponse.name);
+                    } catch (EOFException e) {
+                        // Handle end of input gracefully
+                        System.out.println("End of input stream");
+                        break;
+                    } catch (IOException e) {
+                        // We might get stream errors if the format doesn't match
+                        System.out.println("Stream error: " + e.getMessage());
+
+                        // Try regular object input stream for backward compatibility
+                        try {
+                            Object receivedObject = in.readObject();
+                            if (receivedObject != null) {
+                                if (receivedObject instanceof String) {
+                                    System.out.println("Master received (legacy mode): " + receivedObject);
+                                } else if (receivedObject instanceof Store) {
+                                    Store storeResponse = (Store) receivedObject;
+                                    System.out.println("Processed store (legacy mode): " + storeResponse.name);
+                                }
+                            }
+                        } catch (Exception ex) {
+                            System.out.println("Legacy read failed: " + ex.getMessage());
+                            // Continue trying - don't break the loop
                         }
                     }
                 }
-            } catch (EOFException e) {
-                // This is normal when the socket is closed
-                System.out.println("Connection closed by MasterServer");
+            } catch (Exception e) {
+                System.out.println("Connection closed or error: " + e.getMessage());
             }
 
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             System.out.println("Master run failed.");
             e.printStackTrace();
         }
     }
-
-    // Rest of the Master class remains unchanged
+    
     static List<Store> myStores = new ArrayList<Store>();
 
     public static void read(String path) throws IOException {

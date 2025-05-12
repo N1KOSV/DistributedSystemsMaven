@@ -8,6 +8,7 @@ public class ActionsForMaster extends Thread {
     private final Object receivedObject;
     private final String situation;
     private final Socket socket;
+    private final int number;
 
     private volatile boolean running = true;
 
@@ -15,38 +16,39 @@ public class ActionsForMaster extends Thread {
         running = false;
     }
 
-    public ActionsForMaster(Object receivedObject, String situation, Socket socket) {
+    public ActionsForMaster(Object receivedObject, String situation, Socket socket, int number) {
         this.receivedObject = receivedObject;
         this.situation = situation;
         this.socket = socket;
+        this.number = number;
     }
+
 
     @Override
     public void run() {
         if (situation.equals("1")) {
             try {
-                int number = 5014;
+                int port = 5014;
                 String ip = "127.0.0.1";
                 if (receivedObject instanceof Store) {
                     Store current = (Store) receivedObject;
                     if (current.storeID % 3 == 0) {
-                        number = 5014;
+                        port = 5014;
                         ip = "127.0.0.1";
                     } else if (current.storeID % 3 == 1) {
-                        number = 5015;
+                        port = 5015;
                         ip = "127.0.0.1";
                     } else {
-                        number = 5016;
+                        port = 5016;
                         ip = "127.0.0.1";
                     }
-                    System.out.println(number);
-                    Socket workerSocket = new Socket(ip, number);
+                    System.out.println(port);
+                    Socket workerSocket = new Socket(ip, port);
                     ObjectOutputStream out = new ObjectOutputStream(workerSocket.getOutputStream());
 
                     out.writeObject(receivedObject);
                     out.flush();
-
-                    System.out.println("Sent to Worker: " + receivedObject.getClass().getSimpleName());
+                    
                     workerSocket.close();
                     stopThread();
                 } else {
@@ -76,20 +78,22 @@ public class ActionsForMaster extends Thread {
                 e.printStackTrace();
             }
 
-        } else { // situation "2" - handling data from Reducer back to Master
+        } else {
             try {
                 // Make sure we have a valid socket and it's open
                 if (socket != null && !socket.isClosed()) {
-                    // Create new output stream for the existing socket if needed
-                    // This is important because we're writing back to the original connection
-                    ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                    out.flush();
+                    // Use a special technique to avoid stream corruption, We'll need to create a temporary ByteArrayOutputStream to hold the serialized object
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    ObjectOutputStream tempOut = new ObjectOutputStream(baos);
+                    tempOut.writeObject(receivedObject);
+                    tempOut.flush();
 
-                    // Write the object back to the client (Master)
-                    out.writeObject(receivedObject);
-                    out.flush();
-
-                    System.out.println("Forwarded to Master from Reducer: " + receivedObject);
+                    // Now write the length and bytes to the socket output stream
+                    DataOutputStream socketOut = new DataOutputStream(socket.getOutputStream());
+                    byte[] serializedObject = baos.toByteArray();
+                    socketOut.writeInt(serializedObject.length);
+                    socketOut.write(serializedObject);
+                    socketOut.flush();
 
                     // Don't close the socket here - let the MasterServer handle that
                 } else {

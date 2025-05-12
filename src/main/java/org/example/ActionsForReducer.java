@@ -19,25 +19,26 @@ class ActionsForReducer extends Thread {
     public void run() {
         while (running) {
             try {
-                //Connection with MasterServer
-                // Receive data from Worker
                 ObjectInputStream workerIn = new ObjectInputStream(socket.getInputStream());
-                //ObjectOutputStream WorkerOut = new ObjectOutputStream(socket.getOutputStream());
-                //Store receivedFromWorker = (Store) workerIn.readObject();
-
-                // Connect back to Master
-                Socket masterSocket = new Socket("127.0.0.2", 5012); // Use correct MasterServer port
+                Socket masterSocket = new Socket("127.0.0.2", 5012);
                 System.out.println("Reducer: Connection received");
                 ObjectOutputStream out = new ObjectOutputStream(masterSocket.getOutputStream());
-                if(workerIn.readObject()!=null ) { if (workerIn.readObject() instanceof Store){ Store newStore = (Store) workerIn.readObject();
-                    System.out.println(newStore.toString()); } }
-                out.writeObject(workerIn.readObject()); // Send something immediately
-                out.flush();
 
-                // Clean up
-                //WorkerOut.close();
-                //masterSocket.close();
-                //socket.close();
+                Object receivedObject;
+                while ((receivedObject = workerIn.readObject()) != null) {
+                    if (receivedObject instanceof Store) {
+                        Store newStore = (Store) receivedObject;
+                        System.out.println("STORE: " + newStore.toString());
+
+                        // Forward the store to the master server
+                        out.writeObject(newStore);
+                        out.flush();
+                    } else if (receivedObject instanceof String) {
+                        System.out.println("Received message: " + receivedObject);
+                    }
+                }
+
+                masterSocket.close();
                 stopThread();
             } catch (IOException | ClassNotFoundException e) {
                 System.out.println("Actions for Reducer failed.");

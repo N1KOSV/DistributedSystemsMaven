@@ -48,11 +48,11 @@ class ActionsForWorker extends Thread {
                     System.out.println("got it");
                     for(Store store : myStores) {
                     reducerOut.writeObject(store);
-                        System.out.println(store.toString());
+                        System.out.println("Sent out: " + store.toString());
+                        Thread.sleep(1000);
                     reducerOut.flush();}
                     reducerSocket.close();}
                 else{Socket reducerSocket = new Socket("127.0.0.2", 5002);
-                    System.out.println("Σπάω με την Visa, ρουφάω από το πενηντάρι");
                     System.out.println(command);
                     ObjectOutputStream reducerOut = new ObjectOutputStream(reducerSocket.getOutputStream());
                     //reducerOut.writeObject(myStores.getFirst());
@@ -61,7 +61,7 @@ class ActionsForWorker extends Thread {
                 //printStores();
                 stopThread();
 
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 System.out.println("Actions for Worker failed.");
                 e.printStackTrace();
                 stopThread();

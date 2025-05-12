@@ -1,82 +1,85 @@
 package org.example;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MasterServer {
-
+    // Map to track client connections by address
+    private Map<String, ClientConnection> clientConnections = new ConcurrentHashMap<>();
     int number = 0;
+
+    // Class to hold both socket and its streams
+    private static class ClientConnection {
+        Socket socket;
+        ObjectOutputStream out;
+
+        public ClientConnection(Socket socket, ObjectOutputStream out) {
+            this.socket = socket;
+            this.out = out;
+        }
+    }
 
     void openServer() {
         try (ServerSocket serverSocket = new ServerSocket(5012)) {
             System.out.println("Master Server is listening on port " + serverSocket.getLocalPort());
-
+ 
             while (true) {
                 number++;
                 Socket socket = serverSocket.accept();
                 String clientAddress = socket.getInetAddress().getHostAddress();
-                System.out.println("Connection #" + number + " from " + clientAddress);
 
-                // Determine client type by IP - this logic might need adjustment depending on your network
                 String tag = clientAddress.endsWith("1") ? "1" : "2";
-                System.out.println("Client identified as type: " + tag);
-
-                // Start a dedicated thread for this client
-                new Thread(() -> handleClient(socket, tag)).start();
+                
+                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                out.flush();
+                
+                if (tag.equals("1")) {
+                    clientConnections.put(clientAddress, new ClientConnection(socket, out));
+                    System.out.println("Registered Master client: " + clientAddress);
+                }
+                
+                ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                
+                new Thread(() -> handleClient(socket, in, out, tag, clientAddress)).start();
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void handleClient(Socket socket, String tag) {
+    private void handleClient(Socket socket, ObjectInputStream in, ObjectOutputStream out, String tag, String clientAddress) {
         try {
-            // Important: create output stream first to avoid blocking issues
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.flush();
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-
             Object received;
-            System.out.println("Ready to receive objects from client " + tag);
 
             while ((received = in.readObject()) != null) {
-                System.out.println("Received object: " + received.getClass().getSimpleName() +
-                        " from client type: " + tag);
 
-                // Pass the received object and situation to a new thread for processing
-                ActionsForMaster actionThread = new ActionsForMaster(received, tag, socket);
-                actionThread.start();
+                if (tag.equals("2")) {
+                    if (!clientConnections.isEmpty()) {
+                        ClientConnection masterConn = clientConnections.values().iterator().next();
+                        if (masterConn != null && !masterConn.socket.isClosed()) {
 
-                // For debugging: print when the action thread is started
-                System.out.println("Started processing thread for: " + received.getClass().getSimpleName());
-
-                // If it's a command like "PROCESS", send acknowledgment back to Master
-                if (received instanceof String) {
-                    // Wait briefly for worker processing to start
-                    Thread.sleep(500);
-                    // Send acknowledgment
-                    out.writeObject((String)received);
-                    System.out.println((String)received);
-                    out.flush();
-                    System.out.println("Sent acknowledgment back to Master");
-                }
-                else if (received instanceof Store && tag.equals("2")) {
-                    Thread.sleep(500);
-                    // Send acknowledgment
-                    Store myStore = (Store)received;
-                    System.out.println(myStore.toString());
-                    out.writeObject((Store)received);
-                    out.flush();
-                    System.out.println("Sent acknowledgment back to Master");
+                            ActionsForMaster actionThread = new ActionsForMaster(received, tag, masterConn.socket, number);
+                            actionThread.start();
+                            System.out.println("Forwarding to Master client");
+                        }
+                    }
+                } else {
+                    ActionsForMaster actionThread = new ActionsForMaster(received, tag, socket, number);
+                    actionThread.start();
                 }
             }
-
-        } catch (IOException | ClassNotFoundException | InterruptedException e) {
+        } catch (IOException | ClassNotFoundException e) {
             System.out.println("Client disconnected or error: " + e.getMessage());
+
+
+            if (tag.equals("1")) {
+                clientConnections.remove(clientAddress);
+                System.out.println("Unregistered Master client: " + clientAddress);
+            }
         } finally {
             try {
                 if (!socket.isClosed()) {

@@ -45,8 +45,8 @@ public class WorkerServer {
                     String message = (String) received;
                     if (message.startsWith("Lat: ")){latitude = Double.parseDouble(message.substring(5));}
                     if (message.startsWith("Lon: ")){longitude = Double.parseDouble(message.substring(5));}
-                    Thread m = new ActionsForWorker(myStores, message);
-                    m.start();
+                    //Thread m = new ActionsForWorker(myStores, message);
+                    //m.start();
                     System.out.println(message);
                     if (message.equalsIgnoreCase("send")) {
                         // Start processing the list (e.g., launch thread)
