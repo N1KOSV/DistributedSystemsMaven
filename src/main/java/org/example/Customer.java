@@ -47,7 +47,7 @@ public class Customer extends Thread{
 
 
 	public static void main(String[] args) throws IOException {
-		Master.read("src/main/resources");
+		Manager.read("src/main/resources");
 
 		Scanner scanner = new Scanner(System.in);
 		/*
@@ -57,7 +57,7 @@ public class Customer extends Thread{
 		double longitude = scanner.nextDouble();*/
 		double latitude = 38.02233;
 		double longitude = 23.7479;
-		Master master = new Master(latitude,longitude,false);
+		Manager manager = new Manager(latitude,longitude,false);
 		//Customer currentCustomer = new Customer(longitude, latitude);
 		
 		System.out.print("What would you like to do?\n");
@@ -66,7 +66,8 @@ public class Customer extends Thread{
 		
 		int choice = scanner.nextInt();
 		while (choice != 5) {
-			if (choice == 1) {Master.seeAvailableStores(longitude, latitude,9);}
+			if (choice == 1) {
+				Manager.seeAvailableStores(longitude, latitude,9);}
 			else if (choice == 2) {
 				int filterChoice = -1;
 				while (filterChoice != 0) {
@@ -79,7 +80,7 @@ public class Customer extends Thread{
 					ArrayList<Integer> priPicks = new ArrayList<>();
 					ArrayList<Integer> ratPicks = new ArrayList<>();
 					if (filterChoice == 1) {
-						Set<String> categories = Master.getStoreCategories();
+						Set<String> categories = Manager.getStoreCategories();
 
 						int i = 1;
 						for (String category : categories) {
