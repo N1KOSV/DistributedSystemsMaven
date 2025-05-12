@@ -55,12 +55,21 @@ public class MasterServer {
                 System.out.println("Started processing thread for: " + received.getClass().getSimpleName());
 
                 // If it's a command like "PROCESS", send acknowledgment back to Master
-                if (received instanceof String && ((String)received).equals("PROCESS")) {
+                if (received instanceof String) {
                     // Wait briefly for worker processing to start
                     Thread.sleep(500);
-
                     // Send acknowledgment
                     out.writeObject((String)received);
+                    System.out.println((String)received);
+                    out.flush();
+                    System.out.println("Sent acknowledgment back to Master");
+                }
+                else if (received instanceof Store && tag.equals("2")) {
+                    Thread.sleep(500);
+                    // Send acknowledgment
+                    Store myStore = (Store)received;
+                    System.out.println(myStore.toString());
+                    out.writeObject((Store)received);
                     out.flush();
                     System.out.println("Sent acknowledgment back to Master");
                 }

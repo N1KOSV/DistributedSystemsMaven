@@ -37,8 +37,11 @@ public class Master extends Thread {
             System.out.println("Master sent Store to MasterServer");
 
             // Step 2: Send acknowledgment to MasterServer to start processing
-            out.writeObject("PROCESS");
+            out.writeObject("Lat: " + String.valueOf(latitude));
             out.flush();
+            out.writeObject("Lon: " +String.valueOf(longitude));
+            out.flush();
+            out.writeObject("send");
             System.out.println("Master sent PROCESS command");
 
             // Step 3: Set up a loop to continuously read responses
@@ -47,10 +50,11 @@ public class Master extends Thread {
                     Object receivedObject = in.readObject();
                     if (receivedObject != null) {
                         // Print all messages received from MasterServer
-                        System.out.println("Master received from MasterServer: " + receivedObject);
-
+                        if (receivedObject instanceof String) {
+                            System.out.println("Master received from MasterServer: " + receivedObject);
+                        }
                         // Process based on object type if needed
-                        if (receivedObject instanceof Store) {
+                        else if (receivedObject instanceof Store) {
                             Store storeResponse = (Store) receivedObject;
                             System.out.println("Processed store: " + storeResponse.name);
                         }

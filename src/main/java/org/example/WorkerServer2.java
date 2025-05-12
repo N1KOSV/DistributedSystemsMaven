@@ -11,6 +11,8 @@ public class WorkerServer2 {
 
     static List<Store> myStores = new ArrayList<>();
     int number = 0;
+    Double longitude = 0.0;
+    Double latitude = 0.0;
 
     void openServer() {
         try (ServerSocket serverSocket = new ServerSocket(5015)) {
@@ -20,7 +22,7 @@ public class WorkerServer2 {
                 number++;
                 Socket socket = serverSocket.accept();
                 new Thread(() -> handleClient(socket)).start(); // Handle each client on a separate thread
-                System.out.println("Connection #" + number);
+                //System.out.println("Connection #" + number);
             }
 
         } catch (IOException e) {
@@ -41,12 +43,15 @@ public class WorkerServer2 {
                     //m.start();
                 } else if (received instanceof String) {
                     String message = (String) received;
-                    //System.out.println("Received message: " + message);
-                    Thread m = new ActionsForWorker(message);
+                    if (message.startsWith("Lat: ")){latitude = Double.parseDouble(message.substring(5));}
+                    if (message.startsWith("Lon: ")){longitude = Double.parseDouble(message.substring(5));}
+                    Thread m = new ActionsForWorker(myStores, message);
                     m.start();
-                    if (message.equalsIgnoreCase("PROCESS")) {
+                    System.out.println(message);
+                    if (message.equalsIgnoreCase("send")) {
                         // Start processing the list (e.g., launch thread)
-                        new ActionsForWorker(myStores).start();
+                        System.out.println("Shout");
+                        new ActionsForWorker(myStores, "send").start();
                     } else if (message.equalsIgnoreCase("RESET")) {
                         myStores.clear();
                         System.out.println("Store list has been reset.");
@@ -58,7 +63,7 @@ public class WorkerServer2 {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Client disconnected or error occurred: " + e.getMessage());
+            //System.out.println("Client disconnected or error occurred: " + e.getMessage());
         }
     }
 

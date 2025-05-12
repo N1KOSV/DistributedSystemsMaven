@@ -29,9 +29,10 @@ class ActionsForReducer extends Thread {
                 Socket masterSocket = new Socket("127.0.0.2", 5012); // Use correct MasterServer port
                 System.out.println("Reducer: Connection received");
                 ObjectOutputStream out = new ObjectOutputStream(masterSocket.getOutputStream());
+                if(workerIn.readObject()!=null ) { if (workerIn.readObject() instanceof Store){ Store newStore = (Store) workerIn.readObject();
+                    System.out.println(newStore.toString()); } }
                 out.writeObject(workerIn.readObject()); // Send something immediately
                 out.flush();
-                System.out.println("Reducer: Sent initial data");
 
                 // Clean up
                 //WorkerOut.close();

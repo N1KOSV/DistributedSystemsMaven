@@ -23,15 +23,7 @@ public class Customer extends Thread{
         userId = nrUsers;
     }
 
-/*	public customer(Socket connection) {
-		try {
-			out = new ObjectOutputStream(connection.getOutputStream());
-			in = new ObjectInputStream(connection.getInputStream());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-    }*/
-    
+
     public void run() {
 		try {		
 			Worker t =  (Worker)in.readObject();
