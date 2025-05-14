@@ -2,6 +2,8 @@ package org.example;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.AbstractMap;
+import java.util.Map;
 
 public class ActionsForMaster extends Thread {
 
@@ -58,14 +60,14 @@ public class ActionsForMaster extends Thread {
                     ObjectOutputStream out1 = new ObjectOutputStream(workerSocket1.getOutputStream());
                     ObjectOutputStream out2 = new ObjectOutputStream(workerSocket2.getOutputStream());
                     ObjectOutputStream out3 = new ObjectOutputStream(workerSocket3.getOutputStream());
-
-                    out1.writeObject(receivedObject);
+                    Map.Entry<Integer, String> kvp = new AbstractMap.SimpleEntry<>(number, (String) receivedObject);
+                    out1.writeObject(kvp);
                     out1.flush();
-                    out2.writeObject(receivedObject);
+                    out2.writeObject(kvp);
                     out2.flush();
-                    out3.writeObject(receivedObject);
+                    out3.writeObject(kvp);
                     out3.flush();
-                    System.out.println("Sent to WorkerS: " + receivedObject.getClass().getSimpleName());
+                    System.out.println("Sent to WorkerS: " + kvp.getClass().getSimpleName());
 
                     // Close all worker sockets
                     workerSocket1.close();

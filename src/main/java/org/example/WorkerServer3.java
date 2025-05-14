@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class WorkerServer3 {
 
@@ -41,17 +42,17 @@ public class WorkerServer3 {
                     myStores.add(store);
                     //Thread m = new ActionsForWorker(myStores);
                     //m.start();
-                } else if (received instanceof String) {
-                    String message = (String) received;
+                } else if (received instanceof Map.Entry) {
+                    Map.Entry<Integer, String> kvp = (Map.Entry<Integer, String>) received;
+                    String message = kvp.getValue();
                     if (message.startsWith("Lat: ")){latitude = Double.parseDouble(message.substring(5));}
                     if (message.startsWith("Lon: ")){longitude = Double.parseDouble(message.substring(5));}
                     //Thread m = new ActionsForWorker(myStores, message);
                     //m.start();
                     System.out.println(message);
                     if (message.equalsIgnoreCase("send")) {
-                        // Start processing the list (e.g., launch thread)
                         System.out.println("Shout");
-                        new ActionsForWorker(myStores, "send").start();
+                        new ActionsForWorker(myStores, kvp).start();
                     } else if (message.equalsIgnoreCase("RESET")) {
                         myStores.clear();
                         System.out.println("Reset Ack");

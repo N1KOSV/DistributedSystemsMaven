@@ -22,9 +22,7 @@ public class Manager extends Thread {
     @Override
     public void run() {
         Scanner scanner = new Scanner(System.in);
-        try (
-                Socket socket = new Socket("127.0.0.1", 5012);  // MasterServer
-        ) {
+        try (Socket socket = new Socket("127.0.0.1", 5012)) {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             out.flush();
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
@@ -70,12 +68,20 @@ public class Manager extends Thread {
                             dataIn.readFully(data);
                             ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(data));
                             Object receivedObject = objIn.readObject();
-                            
+
                             if (receivedObject instanceof String) {
                                 System.out.println("Master received from MasterServer: " + receivedObject);
                             } else if (receivedObject instanceof Store) {
                                 Store storeResponse = (Store) receivedObject;
                                 System.out.println("Processed store: " + storeResponse.name);
+                            } else if (receivedObject instanceof List<?>) {
+                                List<?> tempList = (List<?>) receivedObject;
+                                if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {
+                                    List<Store> storeList = (List<Store>) receivedObject;
+                                    for (Store store : storeList) {
+                                        System.out.println("Processed store: " + store.name);
+                                    }
+                                }
                             }
                         }
                     } catch (IOException e) {break;}}

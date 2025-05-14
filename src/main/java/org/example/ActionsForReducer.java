@@ -2,6 +2,9 @@ package org.example;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 class ActionsForReducer extends Thread {
    Socket socket;
@@ -11,6 +14,7 @@ class ActionsForReducer extends Thread {
     }
 
     private volatile boolean running = true;
+    static List<Store> myStores = new ArrayList<>();
 
     public void stopThread() {
         running = false;
@@ -26,16 +30,24 @@ class ActionsForReducer extends Thread {
 
                 Object receivedObject;
                 while ((receivedObject = workerIn.readObject()) != null) {
-                    if (receivedObject instanceof Store) {
-                        Store newStore = (Store) receivedObject;
-                        System.out.println("STORE: " + newStore.toString());
+                    if (receivedObject instanceof Map.Entry) {
+                        System.out.println("This the case");
+                        List<?> tempList = (List<?>) ((Map.Entry<?, ?>) receivedObject).getValue();
+                        int Key = (int) ((Map.Entry<?, ?>) receivedObject).getKey();
+                        if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {
+                            List<Store> storeList = (List<Store>) tempList;
+                            myStores.addAll(storeList);
+                            System.out.println("Key: " + Key);
 
-                        // Forward the store to the master server
-                        out.writeObject(newStore);
-                        out.flush();
+                            // Forward the store to the master server
+                            out.writeObject(storeList);
+                            out.flush();
+                            myStores.clear();
+                        }
                     } else if (receivedObject instanceof String) {
                         System.out.println("Received message: " + receivedObject);
                     }
+                    
                 }
 
                 masterSocket.close();
