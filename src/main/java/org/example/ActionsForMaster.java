@@ -3,6 +3,7 @@ package org.example;
 import java.io.*;
 import java.net.Socket;
 import java.util.AbstractMap;
+import java.util.List;
 import java.util.Map;
 
 public class ActionsForMaster extends Thread {
@@ -50,17 +51,20 @@ public class ActionsForMaster extends Thread {
 
                     out.writeObject(receivedObject);
                     out.flush();
-                    
+
                     workerSocket.close();
                     stopThread();
-                } else {
+                } else if (receivedObject instanceof String) {
+                    //Map.Entry<Integer, ?> kvpReceived = (Map.Entry<Integer, ?>) receivedObject;
+                    //if (kvpReceived.getValue() instanceof String) {
+                    String receivedOrder = (String) receivedObject;
                     Socket workerSocket1 = new Socket("127.0.0.1", 5014);
                     Socket workerSocket2 = new Socket("127.0.0.1", 5015);
                     Socket workerSocket3 = new Socket("127.0.0.1", 5016);
                     ObjectOutputStream out1 = new ObjectOutputStream(workerSocket1.getOutputStream());
                     ObjectOutputStream out2 = new ObjectOutputStream(workerSocket2.getOutputStream());
                     ObjectOutputStream out3 = new ObjectOutputStream(workerSocket3.getOutputStream());
-                    Map.Entry<Integer, String> kvp = new AbstractMap.SimpleEntry<>(number, (String) receivedObject);
+                    Map.Entry<Integer, String> kvp = new AbstractMap.SimpleEntry<>(number, receivedOrder);
                     out1.writeObject(kvp);
                     out1.flush();
                     out2.writeObject(kvp);
@@ -74,7 +78,13 @@ public class ActionsForMaster extends Thread {
                     workerSocket2.close();
                     workerSocket3.close();
                     stopThread();
+                    //}
                 }
+                else{
+                    System.out.println("OKTOYLAXISTONKATIDIAVASAME");
+                }
+            
+                
             } catch (IOException e) {
                 System.out.println("Failed to send to worker");
                 e.printStackTrace();
@@ -87,8 +97,15 @@ public class ActionsForMaster extends Thread {
                     // Use a special technique to avoid stream corruption, We'll need to create a temporary ByteArrayOutputStream to hold the serialized object
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     ObjectOutputStream tempOut = new ObjectOutputStream(baos);
+                    if (receivedObject instanceof Map.Entry) {
+                        Map.Entry<Integer, ?> kvpReceived = (Map.Entry<Integer, ?>) receivedObject;
+                        List<Store> allmyStores = (List<Store>) kvpReceived.getValue();
+                        for (Store store : allmyStores) {
+                            System.out.println(store.toString());
+                        }
                     tempOut.writeObject(receivedObject);
                     tempOut.flush();
+                    }
 
                     // Now write the length and bytes to the socket output stream
                     DataOutputStream socketOut = new DataOutputStream(socket.getOutputStream());

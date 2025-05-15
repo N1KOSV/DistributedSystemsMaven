@@ -74,12 +74,12 @@ public class Manager extends Thread {
                             } else if (receivedObject instanceof Store) {
                                 Store storeResponse = (Store) receivedObject;
                                 System.out.println("Processed store: " + storeResponse.name);
-                            } else if (receivedObject instanceof List<?>) {
-                                List<?> tempList = (List<?>) receivedObject;
+                            } else if (receivedObject instanceof Map.Entry<?,?>) {
+                                Map.Entry<Integer,List<?>> entry = (Map.Entry <Integer,List<?>>) receivedObject;
+                                List<Store> tempList = (List<Store>) entry.getValue();
                                 if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {
-                                    List<Store> storeList = (List<Store>) receivedObject;
-                                    for (Store store : storeList) {
-                                        System.out.println("Processed store: " + store.name);
+                                    for (Store store : tempList) {
+                                        System.out.println("Processed (And by that I mean received) store: " + store.name);
                                     }
                                 }
                             }
