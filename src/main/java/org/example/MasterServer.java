@@ -30,9 +30,7 @@ public class MasterServer {
             while (true) {
                 Socket socket = serverSocket.accept();
                 String clientAddress = socket.getInetAddress().getHostAddress();
-
                 String tag = clientAddress.endsWith("1") ? "1" : "2";
-                
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                 out.flush();
                 
@@ -41,9 +39,7 @@ public class MasterServer {
                     clientConnections.put(number, new ClientConnection(socket, out));
                     System.out.println("Registered Master client: " + clientAddress);
                 }
-                
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-                
                 new Thread(() -> handleClient(socket, in, out, tag, clientAddress)).start();
             }
         } catch (IOException e) {
@@ -60,13 +56,12 @@ public class MasterServer {
                 if (tag.equals("2")) {
                     if (!clientConnections.isEmpty()) {
                         ClientConnection masterConn = clientConnections.get( (Integer) ((Map.Entry<Integer, ?>) received).getKey());
-                        System.out.println(clientConnections.size() + " - " + (Integer) ((Map.Entry<Integer, ?>) received).getKey());
-                        System.out.println(masterConn.socket.toString());
+                        //System.out.println(clientConnections.size() + " - " + (Integer) ((Map.Entry<Integer, ?>) received).getKey());
+                        //System.out.println(masterConn.socket.toString());
                         if (masterConn != null && !masterConn.socket.isClosed()) {
 
                             ActionsForMaster actionThread = new ActionsForMaster(received, tag, masterConn.socket, number);
                             actionThread.start();
-                            System.out.println("Forwarding to Master client");
                         }
                     }
                 } else {

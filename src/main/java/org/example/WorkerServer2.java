@@ -39,17 +39,12 @@ public class WorkerServer2 {
             while ((received = masterIn.readObject()) != null) {
                 if (received instanceof Store) {
                     Store store = (Store) received;
-                    //System.out.println("Received Store: " + store);
                     myStores.add(store);
-                    //Thread m = new ActionsForWorker(myStores);
-                    //m.start();
                 } else if (received instanceof Map.Entry) {
                     Map.Entry<Integer, String> kvp = (Map.Entry<Integer, String>) received;
                     String message = kvp.getValue();
                     if (message.startsWith("Lat: ")){latitude = Double.parseDouble(message.substring(5));}
                     if (message.startsWith("Lon: ")){longitude = Double.parseDouble(message.substring(5));}
-                    //Thread m = new ActionsForWorker(myStores, message);
-                    //m.start();
                     System.out.println(message);
                     if (message.equalsIgnoreCase("send")) {
                         System.out.println("Shout");

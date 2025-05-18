@@ -42,6 +42,7 @@ public class Manager extends Thread {
             out.flush();
             out.writeObject("send");
             out.flush();
+            Thread.sleep(100);
 
 
 
@@ -55,26 +56,13 @@ public class Manager extends Thread {
 
                 while (true) {
                     try {
-                        if (allresults){
-                        System.out.println("What do you want to do?");
-                        System.out.println("1. Send for all the stores");
-                        String command = scanner.nextLine();
-                        System.out.println(command);
-                        if (command.equals("1")) {out.writeObject("send");allresults = false;}
-                        if (command.equals("2")) {out.writeObject("RESET");allresults = false;}}
                         if (dataIn.available() > 0) {
                             int dataLength = dataIn.readInt();
                             byte[] data = new byte[dataLength];
                             dataIn.readFully(data);
                             ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(data));
                             Object receivedObject = objIn.readObject();
-
-                            if (receivedObject instanceof String) {
-                                System.out.println("Master received from MasterServer: " + receivedObject);
-                            } else if (receivedObject instanceof Store) {
-                                Store storeResponse = (Store) receivedObject;
-                                System.out.println("Processed store: " + storeResponse.name);
-                            } else if (receivedObject instanceof Map.Entry<?,?>) {
+                            if (receivedObject instanceof Map.Entry<?,?>) {
                                 Map.Entry<Integer,List<?>> entry = (Map.Entry <Integer,List<?>>) receivedObject;
                                 List<Store> tempList = (List<Store>) entry.getValue();
                                 if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {
@@ -83,10 +71,39 @@ public class Manager extends Thread {
                                     }
                                 }
                             }
+                            else{
+                                System.out.println("Σκάμε καθυστερημένοι");
+                            }
                         }
+                        if (allresults) {
+                            System.out.println("What do you want to do?");
+                            System.out.println("1. See all the stores");
+                            System.out.println("2. Add a new store");
+                            System.out.println("3. Edit a store");
+                            System.out.println("4. View store details");
+                            String command = scanner.nextLine();
+                            System.out.println(command);
+                            if (command.equals("1")) {out.writeObject("send");Thread.sleep(100);}
+                            if (command.equals("2")) {
+                                Store newStore = newStore(scanner);
+                                out.writeObject(newStore);
+                            }
+                            if (command.equals("3")) {
+                                System.out.println("Which store do you want to edit?");
+                                out.writeObject("send");
+                                Thread.sleep(100);
+                                for (Store store : myStores) {System.out.println(store.storeID + ". " + store.name);}
+                                System.out.println("Press the corresponding number to select a store");
+                                String storeID = scanner.nextLine();
+                            }
+                            if (command.equals("4")) {out.writeObject("VIEW");}
+                        }      
                     } catch (IOException e) {break;}}
             } catch (Exception e) {System.out.println("Connection closed or error: " + e.getMessage());}
-        } catch (IOException e) {e.printStackTrace();}}
+        } catch (IOException e) {e.printStackTrace();} catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
     
     static List<Store> myStores = new ArrayList<Store>();
 
@@ -190,7 +207,7 @@ public class Manager extends Thread {
         }
     }
 
-    public void newStore(Scanner scanner) throws IOException {
+    public Store newStore(Scanner scanner) throws IOException {
         System.out.println("Enter the name of the store");
         String storeName = scanner.nextLine();
         System.out.println("Enter the type of store");
@@ -229,12 +246,7 @@ public class Manager extends Thread {
                 moreProducts = false;
             }
         }
-        int i = 0;
-
-        for (Store store : myStores) {
-            i++;
-            System.out.println(i + ". " + store.toString() + " - " + myStores.get(i - 1).products.size());
-        }
+        return myStore;
     }
 
     public void seeAllAvailableStores() {
