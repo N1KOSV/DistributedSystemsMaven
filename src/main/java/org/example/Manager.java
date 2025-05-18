@@ -72,7 +72,6 @@ public class Manager extends Thread {
                                 }
                             }
                             else{
-                                System.out.println("Σκάμε καθυστερημένοι");
                             }
                         }
                         if (allresults) {
@@ -92,7 +91,21 @@ public class Manager extends Thread {
                                 System.out.println("Which store do you want to edit?");
                                 out.writeObject("send");
                                 Thread.sleep(100);
-                                for (Store store : myStores) {System.out.println(store.storeID + ". " + store.name);}
+                                int dataLength = dataIn.readInt();
+                                byte[] data = new byte[dataLength];
+                                dataIn.readFully(data);
+                                ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(data));
+                                Object receivedObject = objIn.readObject();
+                                if (receivedObject instanceof Map.Entry<?,?>) {
+                                    Map.Entry<Integer,List<?>> entry = (Map.Entry <Integer,List<?>>) receivedObject;
+                                    List<Store> tempList = (List<Store>) entry.getValue();
+                                    if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {
+                                        for (Store store : tempList) {
+                                            System.out.println(store.storeID + ". " + store.name);
+                                        }
+                                        System.out.println(tempList.size());
+                                    }
+                                }
                                 System.out.println("Press the corresponding number to select a store");
                                 String storeID = scanner.nextLine();
                             }

@@ -30,8 +30,6 @@ class ActionsForWorker extends Thread {
     public void printStores() {
         if(!myStores.isEmpty()) {
             System.out.println(myStores.size());
-            //System.out.println(myStores.getLast());
-            //System.out.println(myStores.getFirst());
         }
     }
     
@@ -43,20 +41,16 @@ class ActionsForWorker extends Thread {
                 System.out.println(kvp.getKey() + " " + kvp.getValue());
                 if (kvp.getValue().equals("send")){Socket reducerSocket = new Socket("127.0.0.2", 5002);
                     ObjectOutputStream reducerOut = new ObjectOutputStream(reducerSocket.getOutputStream());
-                    System.out.println("got it");
                     Map.Entry<Integer, List<Store> > response = new AbstractMap.SimpleEntry<>(kvp.getKey(), myStores);
+                    printStores();
                     reducerOut.writeObject(response);
-                    //reducerOut.writeObject(myStores);
-                    //System.out.println("Sent out: myStores");
                     reducerOut.flush();
                     reducerSocket.close();}
                 else{Socket reducerSocket = new Socket("127.0.0.2", 5002);
                     System.out.println(command);
                     ObjectOutputStream reducerOut = new ObjectOutputStream(reducerSocket.getOutputStream());
-                    //reducerOut.writeObject(myStores.getFirst());
                     reducerOut.flush();reducerSocket.close();}
                 i++;
-                //printStores();
                 stopThread();
 
             } catch (IOException e) {

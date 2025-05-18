@@ -47,7 +47,7 @@ public class WorkerServer2 {
                     if (message.startsWith("Lon: ")){longitude = Double.parseDouble(message.substring(5));}
                     System.out.println(message);
                     if (message.equalsIgnoreCase("send")) {
-                        System.out.println("Shout");
+                        System.out.println(myStores.size() + " <- HERE");
                         new ActionsForWorker(myStores, kvp).start();
                     } else if (message.equalsIgnoreCase("RESET")) {
                         myStores.clear();
