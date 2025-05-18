@@ -80,9 +80,6 @@ public class ActionsForMaster extends Thread {
                     stopThread();
                     //}
                 }
-                else{
-                    System.out.println("OKTOYLAXISTONKATIDIAVASAME");
-                }
             
                 
             } catch (IOException e) {

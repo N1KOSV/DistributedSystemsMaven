@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MasterServer {
     // Map to track client connections by address
-    private Map<String, ClientConnection> clientConnections = new ConcurrentHashMap<>();
+        private Map<Integer, ClientConnection> clientConnections = new ConcurrentHashMap<>();
     int number = 0;
 
     // Class to hold both socket and its streams
@@ -28,7 +28,6 @@ public class MasterServer {
             System.out.println("Master Server is listening on port " + serverSocket.getLocalPort());
  
             while (true) {
-                number++;
                 Socket socket = serverSocket.accept();
                 String clientAddress = socket.getInetAddress().getHostAddress();
 
@@ -38,7 +37,8 @@ public class MasterServer {
                 out.flush();
                 
                 if (tag.equals("1")) {
-                    clientConnections.put(clientAddress, new ClientConnection(socket, out));
+                    number++;
+                    clientConnections.put(number, new ClientConnection(socket, out));
                     System.out.println("Registered Master client: " + clientAddress);
                 }
                 
@@ -59,7 +59,9 @@ public class MasterServer {
 
                 if (tag.equals("2")) {
                     if (!clientConnections.isEmpty()) {
-                        ClientConnection masterConn = clientConnections.values().iterator().next();
+                        ClientConnection masterConn = clientConnections.get( (Integer) ((Map.Entry<Integer, ?>) received).getKey());
+                        System.out.println(clientConnections.size() + " - " + (Integer) ((Map.Entry<Integer, ?>) received).getKey());
+                        System.out.println(masterConn.socket.toString());
                         if (masterConn != null && !masterConn.socket.isClosed()) {
 
                             ActionsForMaster actionThread = new ActionsForMaster(received, tag, masterConn.socket, number);
@@ -77,7 +79,7 @@ public class MasterServer {
 
 
             if (tag.equals("1")) {
-                clientConnections.remove(clientAddress);
+                //clientConnections.remove(clientAddress);
                 System.out.println("Unregistered Master client: " + clientAddress);
             }
         } finally {
