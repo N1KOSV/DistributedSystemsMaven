@@ -45,7 +45,6 @@ public class ActionsForMaster extends Thread {
                         port = 5016;
                         ip = "127.0.0.1";
                     }
-                    System.out.println(port);
                     Socket workerSocket = new Socket(ip, port);
                     ObjectOutputStream out = new ObjectOutputStream(workerSocket.getOutputStream());
 
@@ -56,6 +55,7 @@ public class ActionsForMaster extends Thread {
                     stopThread();
                 } else if (receivedObject instanceof String) {
                     String receivedOrder = (String) receivedObject;
+                    System.out.println( number + " Has ordered " + receivedOrder);
                     Socket workerSocket1 = new Socket("127.0.0.1", 5014);
                     Socket workerSocket2 = new Socket("127.0.0.1", 5015);
                     Socket workerSocket3 = new Socket("127.0.0.1", 5016);
@@ -69,7 +69,7 @@ public class ActionsForMaster extends Thread {
                     out2.flush();
                     out3.writeObject(kvp);
                     out3.flush();
-                    System.out.println("Sent to WorkerS: " + kvp.getClass().getSimpleName());
+                    //System.out.println("Sent to WorkerS: " + kvp.getClass().getSimpleName());
 
                     // Close all worker sockets
                     workerSocket1.close();
@@ -93,11 +93,6 @@ public class ActionsForMaster extends Thread {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     ObjectOutputStream tempOut = new ObjectOutputStream(baos);
                     if (receivedObject instanceof Map.Entry) {
-                        Map.Entry<Integer, ?> kvpReceived = (Map.Entry<Integer, ?>) receivedObject;
-                        List<Store> allmyStores = (List<Store>) kvpReceived.getValue();
-                        for (Store store : allmyStores) {
-                            System.out.println(store.toString());
-                        }
                     tempOut.writeObject(receivedObject);
                     tempOut.flush();
                     }
