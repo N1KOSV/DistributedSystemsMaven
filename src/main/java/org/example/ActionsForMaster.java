@@ -55,8 +55,6 @@ public class ActionsForMaster extends Thread {
                     workerSocket.close();
                     stopThread();
                 } else if (receivedObject instanceof String) {
-                    //Map.Entry<Integer, ?> kvpReceived = (Map.Entry<Integer, ?>) receivedObject;
-                    //if (kvpReceived.getValue() instanceof String) {
                     String receivedOrder = (String) receivedObject;
                     Socket workerSocket1 = new Socket("127.0.0.1", 5014);
                     Socket workerSocket2 = new Socket("127.0.0.1", 5015);

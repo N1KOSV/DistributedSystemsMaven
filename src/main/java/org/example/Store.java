@@ -26,7 +26,6 @@ public class Store implements Serializable {
         this.products = new ArrayList<>();
         this.storeID = storeID;
     }
-    
 
     public void addProduct(String name, String type, int amount ,Double price){
         products.add(new Product(name,type,amount,price));
@@ -87,5 +86,17 @@ public class Store implements Serializable {
     @Override
     public String toString() {
         return   name  + ": " + foodCategory + " ( " + getAvgPrice() + " ) rating: " + stars + "/5 (" + votes + ") " + "total sales: " + getTotalSales();
+    }
+
+    public String detailedToString() {
+        String answer = "========================================================================================\nSTORE ID: " + storeID +
+                "\nSTORE NAME: " + name + 
+                "\nSTORE AVERAGE PRICE: " + getAvgPrice() + 
+                "\nSTORE TYPE: " + foodCategory + 
+                "\nSTORE RATINGS: " + stars + " (" + votes + ")\n"
+                +"========================================================================================\nPRODUCTS:";
+                for(Product p: getProducts()){ answer += p.detailedToString();}
+                return answer +"\n========================================================================================" + "\nSTORE TOTAL SALES: " + getTotalSales() + "\n========================================================================================";
+
     }
 }

@@ -43,15 +43,8 @@ public class Manager extends Thread {
             out.writeObject("send");
             out.flush();
             Thread.sleep(100);
-
-
-
-            System.out.println("Master sent PROCESS command");
-
-            // Step 3: Set up a loop to continuously read responses
+            
             try {
-                // This approach handles both ObjectInputStream and the modified approach
-                // from ActionsForMaster where we're sending data with DataOutputStream
                 DataInputStream dataIn = new DataInputStream(socket.getInputStream());
 
                 while (true) {
@@ -99,17 +92,33 @@ public class Manager extends Thread {
                                 if (receivedObject instanceof Map.Entry<?,?>) {
                                     Map.Entry<Integer,List<?>> entry = (Map.Entry <Integer,List<?>>) receivedObject;
                                     List<Store> tempList = (List<Store>) entry.getValue();
-                                    if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {
-                                        for (Store store : tempList) {
-                                            System.out.println(store.storeID + ". " + store.name);
-                                        }
-                                        System.out.println(tempList.size());
-                                    }
-                                }
+                                    tempList.sort(Comparator.comparingInt(Store::getStoreID));
+                                    myStores = tempList;
+                                    if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {for (Store store : tempList) {System.out.println(store.storeID + ". " + store.name);}}}
                                 System.out.println("Press the corresponding number to select a store");
-                                String storeID = scanner.nextLine();
+                                int storeID =  Integer.parseInt(scanner.nextLine());
+                                Store myStore = getByStoreID(storeID, myStores);
+                                String response = editStore(scanner, myStore);
+                                System.out.println(response);
+                                out.writeObject(response);
                             }
-                            if (command.equals("4")) {out.writeObject("VIEW");}
+                            if (command.equals("4")) {out.writeObject("send");Thread.sleep(100);
+                                int dataLength = dataIn.readInt();
+                                byte[] data = new byte[dataLength];
+                                dataIn.readFully(data);
+                                ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(data));
+                                Object receivedObject = objIn.readObject();
+                                if (receivedObject instanceof Map.Entry<?,?>) {
+                                    Map.Entry<Integer,List<?>> entry = (Map.Entry <Integer,List<?>>) receivedObject;
+                                    List<Store> tempList = (List<Store>) entry.getValue();
+                                    tempList.sort(Comparator.comparingInt(Store::getStoreID));
+                                    myStores = tempList;
+                                    if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {for (Store store : tempList) {System.out.println(store.storeID + ". " + store.name);}}}
+                                System.out.println("Press the corresponding number to select a store");
+                                int storeID =  Integer.parseInt(scanner.nextLine());
+                                Store myStore = getByStoreID(storeID, myStores);
+                                System.out.println(myStore.detailedToString());
+                            }
                         }      
                     } catch (IOException e) {break;}}
             } catch (Exception e) {System.out.println("Connection closed or error: " + e.getMessage());}
@@ -154,21 +163,14 @@ public class Manager extends Thread {
         }
     }
 
-    public void editStore() {
-        Scanner scanner = new Scanner(System.in);
-        int i = 1;
-        myStores.sort(Comparator.comparingInt(Store::getStoreID));
-        for (Store store : myStores) {
-            System.out.println(i + ". " + store.name);
-            i++;
-        }
-        System.out.println("Which store would you like to edit?");
-        int answer = Integer.parseInt(scanner.nextLine());
+    public String editStore(Scanner scanner, Store store) {
+        Boolean ready = false;
         System.out.println("What do you want to edit?");
         System.out.println("1. Add a new product");
         System.out.println("2. Edit a product quantity");
         int answer2 = Integer.parseInt(scanner.nextLine());
         if (answer2 == 1) {
+        while (!ready) {
             System.out.println("Enter the product name");
             String productName = scanner.nextLine();
             System.out.println("Enter the product type");
@@ -177,23 +179,28 @@ public class Manager extends Thread {
             String productPrice = scanner.nextLine();
             System.out.println("Enter the product amount");
             String productAmount = scanner.nextLine();
-            myStores.get(answer - 1).addProduct(productName, productType, Integer.parseInt(productAmount), Double.parseDouble(productPrice));
+            System.out.println("This is your product: ");
+            System.out.println("Name: " + productName);
+            System.out.println("Type: " + productType);
+            System.out.println("Price: " + productPrice + " €");
+            System.out.println("Amount: " + productAmount + " pcs");
+            System.out.println("For the store: " + store.name);
+            System.out.println("Is this information correct? Y/N");
+            String answer3 = scanner.nextLine();
+            if (answer3.equals("Y")) {ready = true; return "newProd::" + store.storeID + "::" + productName + "::" + productType + "::" + productPrice + "::" + productAmount;}
+        }
         }
         else if (answer2 == 2) {
-            for (Product product : myStores.get(answer - 1).getProducts()) System.out.println(product.getName());
+            int i = 0;
+            System.out.println("Select the product to edit");
+            for (Product p : store.getProducts()) {i++; System.out.println(i + ". " + p.getName());}
             answer2 = Integer.parseInt(scanner.nextLine());
-            System.out.println("How much of this item is in stock?");
+            Product myProduct = store.getProducts().get(answer2 - 1);
+            System.out.println("How much of " + myProduct.getName() + " is in stock?");
             int answer3 = Integer.parseInt(scanner.nextLine());
-            myStores.get(answer - 1).products.get(answer2 - 1).setAmount(answer3);
-        } else if (answer2 == 3) {
-            i = 0;
-            for (Product product : myStores.get(answer - 1).getProducts()) {
-                i++;
-                System.out.println(i + ". " + product.getName());
-            }
-            answer2 = Integer.parseInt(scanner.nextLine());
-            myStores.get(answer - 1).products.get(answer2 - 1).setAmount(-1);
+            return "changeAvailability::" + store.storeID + "::" + myProduct.getName() + "::" + answer3;
         }
+return null;
     }
 
     public void sell() {
@@ -219,6 +226,13 @@ public class Manager extends Thread {
             i++;
         }
     }
+
+
+    public Store getByStoreID(int storeID, List<Store> stores) {
+        for (Store store : stores) {if (store.storeID == storeID){return store;}}
+        return null;
+    }
+
 
     public Store newStore(Scanner scanner) throws IOException {
         System.out.println("Enter the name of the store");

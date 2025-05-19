@@ -39,4 +39,11 @@ public class Product implements Serializable {
     public String toString() {
         return name + ": " + type + " " + price + " € " + " (" + amount + " available units) " ;
     }
+    
+    public String detailedToString() {
+        return "\nNAME: " + name + 
+        "\tPRICE: " + price +
+        "\tTYPE: " + type +
+        "\tTOTAL SALES: " + sales;
+    }
 }

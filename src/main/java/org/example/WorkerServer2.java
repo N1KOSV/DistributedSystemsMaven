@@ -39,7 +39,9 @@ public class WorkerServer2 {
             while ((received = masterIn.readObject()) != null) {
                 if (received instanceof Store) {
                     Store store = (Store) received;
-                    myStores.add(store);
+                    Boolean alreadyExists = false;
+                    for(Store store1 : myStores) {if (store.storeID == store1.storeID) {alreadyExists = true;}}
+                    if (!alreadyExists) {myStores.add(store);}
                 } else if (received instanceof Map.Entry) {
                     Map.Entry<Integer, String> kvp = (Map.Entry<Integer, String>) received;
                     String message = kvp.getValue();
@@ -49,9 +51,17 @@ public class WorkerServer2 {
                     if (message.equalsIgnoreCase("send")) {
                         System.out.println(myStores.size() + " <- HERE");
                         new ActionsForWorker(myStores, kvp).start();
-                    } else if (message.equalsIgnoreCase("RESET")) {
-                        myStores.clear();
-                        System.out.println("Store list has been reset.");
+                    } else if (message.startsWith("newProd::")) {
+                        String[] parts = message.split("::");
+                        for (Store store : myStores) {if (store.storeID == Integer.parseInt(parts[1])){
+                            store.addProduct(parts[2],parts[3],Integer.parseInt(parts[5]),Double.parseDouble(parts[4]));
+                            for (Product p : store.products) {System.out.println(p.getName() + " " + p.getPrice());}}}}
+                    else if (message.startsWith("changeAvailability::")) {
+                            String[] parts = message.split("::");
+                            for (Store store : myStores) {if (store.storeID == Integer.parseInt(parts[1])) {
+                                for (Product p : store.products) { if (p.getName().equals(parts[2])){ p.setAmount(Integer.parseInt(parts[3]));} }
+                                for (Product p : store.products) {System.out.println(p.getName() + " " + p.getAmount());}
+                            }}
                     } else {
                         System.out.println("Unknown command: " + message);
                     }
