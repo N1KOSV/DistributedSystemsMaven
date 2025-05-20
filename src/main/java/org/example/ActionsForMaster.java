@@ -10,7 +10,7 @@ public class ActionsForMaster extends Thread {
 
     private final Object receivedObject;
     private final String situation;
-    private final Socket socket;
+    private Socket socket;
     private final int number;
 
     private volatile boolean running = true;
@@ -55,7 +55,7 @@ public class ActionsForMaster extends Thread {
                     stopThread();
                 } else if (receivedObject instanceof String) {
                     String receivedOrder = (String) receivedObject;
-                    System.out.println( number + " Has ordered " + receivedOrder);
+                    System.out.println(number + " Has ordered " + receivedOrder);
                     Socket workerSocket1 = new Socket("127.0.0.1", 5014);
                     Socket workerSocket2 = new Socket("127.0.0.1", 5015);
                     Socket workerSocket3 = new Socket("127.0.0.1", 5016);
@@ -103,12 +103,10 @@ public class ActionsForMaster extends Thread {
                     socketOut.writeInt(serializedObject.length);
                     socketOut.write(serializedObject);
                     socketOut.flush();
-
                     // Don't close the socket here - let the MasterServer handle that
                 } else {
                     System.out.println("Error: Socket is null or closed, cannot forward to Master");
                 }
-                stopThread();
             } catch (IOException e) {
                 System.out.println("Failed to forward to Master");
                 e.printStackTrace();

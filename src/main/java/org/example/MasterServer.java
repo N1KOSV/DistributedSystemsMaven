@@ -31,8 +31,6 @@ public class MasterServer {
 
             while (true) {
                 Socket socket = serverSocket.accept();
-
-                // Create a new thread for each client connection
                 new Thread(() -> handleNewClient(socket)).start();
             }
         } catch (IOException e) {
@@ -55,9 +53,8 @@ public class MasterServer {
                     clientConnections.put(number, new ClientConnection(socket, out, in));
                     System.out.println("Registered Master client: " + clientAddress + " with ID: " + number);
                 }
-
             // Handle this client's communication
-            handleClient(socket, in, out, tag, clientAddress);
+            new Thread(() -> handleClient(socket, in, out, tag, clientAddress)).start();
 
         } catch (IOException e) {
             System.out.println("Error setting up client connection: " + e.getMessage());
@@ -72,37 +69,35 @@ public class MasterServer {
 
                 if (tag.equals("2")) {
                     if (!clientConnections.isEmpty()) {
+                        //System.out.println((Integer) ((Map.Entry<Integer, ?>) received).getKey());
                         ClientConnection masterConn = clientConnections.get((Integer) ((Map.Entry<Integer, ?>) received).getKey());
-                        System.out.println(masterConn.socket.getInetAddress().getHostAddress() + ":" + masterConn.socket.getPort());
+                        //System.out.println(masterConn.socket.getInetAddress().getHostAddress() + ":" + masterConn.socket.getPort());
                         if (masterConn != null && !masterConn.socket.isClosed()) {
                             ActionsForMaster actionThread = new ActionsForMaster(received, tag, masterConn.socket, number);
                             actionThread.start();
                         }
                     }
                 } else {
-                    ActionsForMaster actionThread = new ActionsForMaster(received, tag, socket, number);
+                    if (received instanceof Map.Entry) {System.out.println((Integer) ((Map.Entry<Integer, ?>) received).getKey());}
+                    System.out.println(socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
+                    for (Map.Entry<Integer, ClientConnection> entry : clientConnections.entrySet()) { if (entry.getValue().socket.equals(socket)){
+                        System.out.println(entry.getKey() + " Τώρα μου μιλάει σαν γνωστή-η-η");
+                    
+                    ActionsForMaster actionThread = new ActionsForMaster(received, tag, socket, entry.getKey());
                     actionThread.start();
+                    } }
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Client disconnected or error: " + e.getMessage());
-
-            if (tag.equals("1")) {
-                // Remove the client connection when they disconnect
-                synchronized (this) {
-                    clientConnections.entrySet().removeIf(entry ->
-                            entry.getValue().socket.equals(socket));
-                }
-                System.out.println("Unregistered Master client: " + clientAddress);
-            }
+            
         } finally {
             try {
                 if (!socket.isClosed()) {
-                    socket.close();
+                    //socket.close();
+                    System.out.println("PTSD-ι-ι, στο σπίτι μου δεν θέλει να 'ρθεί-ι-ι");
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            } catch (Exception e) {e.printStackTrace();}
         }
     }
 
