@@ -42,7 +42,7 @@ class ActionsForWorker extends Thread {
                 if (kvp.getValue().equals("send")){Socket reducerSocket = new Socket("127.0.0.2", 5002);
                     ObjectOutputStream reducerOut = new ObjectOutputStream(reducerSocket.getOutputStream());
                     Map.Entry<Integer, List<Store> > response = new AbstractMap.SimpleEntry<>(kvp.getKey(), myStores);
-                    printStores();
+                    if (myStores != null) {printStores();}
                     reducerOut.writeObject(response);
                     reducerOut.flush();
                     reducerSocket.close();}
@@ -52,7 +52,6 @@ class ActionsForWorker extends Thread {
                     reducerOut.flush();reducerSocket.close();}
                 i++;
                 stopThread();
-
             } catch (IOException e) {
                 System.out.println("Actions for Worker failed.");
                 e.printStackTrace();

@@ -34,13 +34,9 @@ public class Manager extends Thread {
                 System.out.println("Sent store: " + store.name);
             }
             System.out.println("Master sent Store to MasterServer");
-
-            // Step 2: Send acknowledgment to MasterServer to start processing
-            out.writeObject("Lat: " + String.valueOf(latitude));
+            
             out.flush();
-            out.writeObject("Lon: " + String.valueOf(longitude));
-            out.flush();
-            out.writeObject("send");
+            out.writeObject("admin");
             out.flush();
             Thread.sleep(100);
             

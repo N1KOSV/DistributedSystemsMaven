@@ -41,7 +41,7 @@ class ActionsForReducer extends Thread {
                     Map.Entry<?, ?> entry = (Map.Entry<?, ?>) receivedObject;
                     int key = (int) entry.getKey();
                     List<Store> tempList = (List<Store>) entry.getValue();
-
+                    if (tempList != null) {
                     if (!tempList.isEmpty()) {
                         // Cast to the correct type
 
@@ -69,6 +69,7 @@ class ActionsForReducer extends Thread {
                         }
                     }
                 }
+            }
             }
             socket.close();
         } catch (IOException | ClassNotFoundException e) {

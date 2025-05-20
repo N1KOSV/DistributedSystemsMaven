@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class WorkerServer {
 
     static List<Store> myStores = new ArrayList<>();
+    private Map<Integer, List<Store>> nearbyStores = new HashMap();
     int number = 0;
     Double longitude = 0.0;
     Double latitude = 0.0;
@@ -38,31 +37,58 @@ public class WorkerServer {
             while ((received = masterIn.readObject()) != null) {
                 if (received instanceof Store) {
                     Store store = (Store) received;
-                    
                     Boolean alreadyExists = false;
                     for(Store store1 : myStores) {if (store.storeID == store1.storeID) {alreadyExists = true;}}
                     if (!alreadyExists) {myStores.add(store);}
-                    
                 } else if (received instanceof Map.Entry) {
                     Map.Entry<Integer, String> kvp = (Map.Entry<Integer, String>) received;
                     String message = kvp.getValue();
-                    if (message.startsWith("Lat: ")){latitude = Double.parseDouble(message.substring(5));}
-                    if (message.startsWith("Lon: ")){longitude = Double.parseDouble(message.substring(5));}
-                    System.out.println(message);
-                    if (message.equalsIgnoreCase("send")) {
-                        System.out.println("Shout");
-                        new ActionsForWorker(myStores, kvp).start();
-                    } else if (message.startsWith("newProd::")) {
+                    int senderID = kvp.getKey();
+                    if (message.startsWith("Lat::")){latitude = Double.parseDouble(message.substring(5));}
+                    else if (message.startsWith("Lon::")){longitude = Double.parseDouble(message.substring(5));
+                        if (latitude != 0 && longitude != 0 && !nearbyStores.containsKey(senderID)) {
+                            List<Store> clientNearby = new ArrayList<>();
+                            for (Store store1 : myStores) {if (store1.isWithin5km(latitude, longitude)) {clientNearby.add(store1);}}
+                            nearbyStores.put(senderID, clientNearby);}}
+
+                    if (message.equalsIgnoreCase("send")) {new ActionsForWorker(nearbyStores.get(senderID), kvp).start();}
+
+                    else if (message.equalsIgnoreCase("admin")) {nearbyStores.put(senderID, myStores);}
+
+                    else if (message.startsWith("newProd::")) {
                         String[] parts = message.split("::");
-                        for (Store store : myStores) {if (store.storeID == Integer.parseInt(parts[1])){
+                        for (Store store : nearbyStores.get(senderID)) {if (store.storeID == Integer.parseInt(parts[1])){
                             store.addProduct(parts[2],parts[3],Integer.parseInt(parts[5]),Double.parseDouble(parts[4]));
                             for (Product p : store.products) {System.out.println(p.getName() + " " + p.getPrice());}}}}
+
                     else if (message.startsWith("changeAvailability::")) {
                         String[] parts = message.split("::");
-                        for (Store store : myStores) {if (store.storeID == Integer.parseInt(parts[1])) {
-                            for (Product p : store.products) { if (p.getName().equals(parts[2])){ p.setAmount(Integer.parseInt(parts[3]));} }
-                            for (Product p : store.products) {System.out.println(p.getName() + " " + p.getAmount());}
-                        }}
+                        for (Store store : nearbyStores.get(senderID)) {
+                            if (store.storeID == Integer.parseInt(parts[1])) {
+                                for (Product p : store.products) {
+                                    if (p.getName().equals(parts[2])) {p.setAmount(Integer.parseInt(parts[3]));}}
+                                for (Product p : store.products) {System.out.println(p.getName() + " " + p.getAmount());}}
+                        }
+                    } else if (message.startsWith("categories::")) {
+                        Map<String, List<String>> result = new HashMap<>();
+                        String[] parts = message.split("::");
+                        for (int i = 0; i < parts.length - 1; i += 2) {
+                            String key = parts[i];
+                            String value = parts[i + 1];
+                            if (key.equals("ratings")) {value = value.replaceAll("[<\\s]", "");}
+                            List<String> values = Arrays.asList(value.split(","));
+                            result.put(key, values);}
+                        ArrayList<Store> returnal = new ArrayList<>();
+                        System.out.println("Categories: " + result.get("categories"));
+                        for (Store s : nearbyStores.get(senderID)) {
+                            if (result.get("categories").contains(s.foodCategory) && result.get("Prices").contains(s.getAvgPrice())) {
+                                returnal.add(s);
+                            }
+                        }
+                        new ActionsForWorker(returnal, kvp).start();
+                        System.out.println("Prices: " + result.get("prices"));
+                        System.out.println("Ratings: " + result.get("ratings"));
+
                     } else {
                         System.out.println("Unknown command: " + message);
                     }
