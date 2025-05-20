@@ -37,7 +37,6 @@ public class customer2 extends Thread {
 
             try {
                 DataInputStream dataIn = new DataInputStream(socket.getInputStream());
-
                 while (true) {
                     try {
                         if (dataIn.available() > 0) {
@@ -55,8 +54,6 @@ public class customer2 extends Thread {
                                     }
                                 }
                             }
-                            else{
-                            }
                         }
                         if (allresults) {
                             System.out.println("What do you want to do?");
@@ -64,7 +61,7 @@ public class customer2 extends Thread {
                             System.out.println("2. Filter the stores");
                             String command = scanner.nextLine();
                             System.out.println(command);
-                            if (command.equals("1")) {out.writeObject("send");Thread.sleep(200);}
+                            if (command.equals("1")) {out.writeObject("send");Thread.sleep(800);}
                             if (command.equals("2")) {out.writeObject("send");Thread.sleep(200);
                                 int dataLength = dataIn.readInt();
                                 byte[] data = new byte[dataLength];
@@ -80,7 +77,8 @@ public class customer2 extends Thread {
                                         String storeCategories = "categories::" + getStoreCategories(tempList);
                                         String storePriceRanges = "prices::" + getRanges(List.of("$","$$","$$$"));
                                         String storeRatingRanges = "ratings::" + getRanges(List.of("0","1","2","3","4","5"));
-                                        System.out.println(storeCategories + "::" + storePriceRanges + "::" + storeRatingRanges);
+                                        out.writeObject(storeCategories + "::" + storePriceRanges + "::" + storeRatingRanges);
+                                        Thread.sleep(300);
                                     }
                                 }
                             }

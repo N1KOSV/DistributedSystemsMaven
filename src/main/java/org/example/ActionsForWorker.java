@@ -29,7 +29,10 @@ class ActionsForWorker extends Thread {
 
     public void printStores() {
         if(!myStores.isEmpty()) {
-            System.out.println(myStores.size());
+            System.out.println("SIZE: " + myStores.size());
+            for (Store store : myStores) {
+                System.out.println(store.toString());
+            }
         }
     }
     

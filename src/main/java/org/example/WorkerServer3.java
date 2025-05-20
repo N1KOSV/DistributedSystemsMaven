@@ -52,7 +52,7 @@ public class WorkerServer3 {
                             for (Store store1 : myStores) {if (store1.isWithin5km(latitude, longitude)) {clientNearby.add(store1);}}
                             nearbyStores.put(senderID, clientNearby);}}
 
-                    if (message.equalsIgnoreCase("send")) {new ActionsForWorker(nearbyStores.get(senderID), kvp).start();}
+                    if (message.equalsIgnoreCase("send")) {Thread.sleep(30);new ActionsForWorker(nearbyStores.get(senderID), kvp).start();}
 
                     else if (message.equalsIgnoreCase("admin")) {nearbyStores.put(senderID, myStores);}
 
@@ -82,11 +82,12 @@ public class WorkerServer3 {
                         ArrayList<Store> returnal = new ArrayList<>();
                         System.out.println("Categories: " + result.get("categories"));
                         for (Store s : nearbyStores.get(senderID)) {
-                            if (result.get("categories").contains(s.foodCategory) && result.get("Prices").contains(s.getAvgPrice())) {
+                            if (result.get("categories").contains(s.foodCategory) && result.get("prices").contains(s.getAvgPrice())) {
                                 returnal.add(s);
+                                System.out.println(s.toString());
                             }
                         }
-                        new ActionsForWorker(returnal, kvp).start();
+                        new ActionsForWorker(myStores, kvp).start();
                         System.out.println("Prices: " + result.get("prices"));
                         System.out.println("Ratings: " + result.get("ratings"));
 
@@ -99,6 +100,8 @@ public class WorkerServer3 {
             }
         } catch (IOException | ClassNotFoundException e) {
             //System.out.println("Client disconnected or error occurred: " + e.getMessage());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
