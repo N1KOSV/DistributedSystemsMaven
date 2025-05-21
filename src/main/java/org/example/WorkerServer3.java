@@ -52,7 +52,7 @@ public class WorkerServer3 {
                             for (Store store1 : myStores) {if (store1.isWithin5km(latitude, longitude)) {clientNearby.add(store1);}}
                             nearbyStores.put(senderID, clientNearby);}}
 
-                    if (message.equalsIgnoreCase("send")) {Thread.sleep(30);new ActionsForWorker(nearbyStores.get(senderID), kvp).start();}
+                    if (message.equalsIgnoreCase("send")) {new ActionsForWorker(nearbyStores.get(senderID), kvp).start();}
 
                     else if (message.equalsIgnoreCase("admin")) {nearbyStores.put(senderID, myStores);}
 
@@ -100,8 +100,6 @@ public class WorkerServer3 {
             }
         } catch (IOException | ClassNotFoundException e) {
             //System.out.println("Client disconnected or error occurred: " + e.getMessage());
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
     }
 

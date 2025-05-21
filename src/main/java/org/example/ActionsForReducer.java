@@ -42,7 +42,6 @@ class ActionsForReducer extends Thread {
                     int key = (int) entry.getKey();
                     List<Store> tempList = (List<Store>) entry.getValue();
                     if (tempList != null) {
-                    if (!tempList.isEmpty()) {
                         // Cast to the correct type
 
                         // Aggregate the data with the same key
@@ -69,7 +68,6 @@ class ActionsForReducer extends Thread {
                         }
                     }
                 }
-            }
             }
             socket.close();
         } catch (IOException | ClassNotFoundException e) {
