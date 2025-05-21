@@ -22,7 +22,6 @@ public class WorkerServer {
                 number++;
                 Socket socket = serverSocket.accept();
                 new Thread(() -> handleClient(socket)).start(); // Handle each client on a separate thread
-                //System.out.println("Connection #" + number);
             }
 
         } catch (IOException e) {
@@ -78,17 +77,14 @@ public class WorkerServer {
                             if (key.equals("ratings")) {value = value.replaceAll("[<\\s]", "");}
                             List<String> values = Arrays.asList(value.split(","));
                             result.put(key, values);}
-                        ArrayList<Store> returnal = new ArrayList<>();
                         System.out.println("Categories: " + result.get("categories"));
                         for (Store s : nearbyStores.get(senderID)) {
-                            if (result.get("categories").contains(s.foodCategory) && result.get("Prices").contains(s.getAvgPrice())) {
-                                returnal.add(s);
+                            if (!result.get("categories").contains(s.foodCategory) || !result.get("prices").contains(s.getAvgPrice()) || Double.parseDouble(Collections.max(result.get("ratings"))) > s.stars ) {
+                                nearbyStores.get(senderID).remove(s);
+                                System.out.println(s.toString());
                             }
                         }
-                        new ActionsForWorker(returnal, kvp).start();
-                        System.out.println("Prices: " + result.get("prices"));
-                        System.out.println("Ratings: " + result.get("ratings"));
-
+                        new ActionsForWorker(nearbyStores.get(senderID), kvp).start();
                     } else {
                         System.out.println("Unknown command: " + message);
                     }

@@ -60,8 +60,9 @@ public class customer2 extends Thread {
                         }
                         if (allresults) {
                             System.out.println("What do you want to do?");
-                            System.out.println("1. See all the stores (Reset filters)");
-                            System.out.println("2. Filter the stores");
+                            System.out.println("1. See all the stores");
+                            System.out.println("2. Apply Filters");
+                            System.out.println("3. Clear Filters");
                             String command = scanner.nextLine();
                             System.out.println(command);
                             if (command.equals("1")) {out.writeObject("send");Thread.sleep(200);}
@@ -80,7 +81,10 @@ public class customer2 extends Thread {
                                         String storeCategories = "categories::" + getStoreCategories(tempList);
                                         String storePriceRanges = "prices::" + getRanges(List.of("$","$$","$$$"));
                                         String storeRatingRanges = "ratings::" + getRanges(List.of("0","1","2","3","4","5"));
-                                        System.out.println(storeCategories + "::" + storePriceRanges + "::" + storeRatingRanges);
+                                        out.writeObject(storeCategories + "::" + storePriceRanges + "::" + storeRatingRanges);
+                                        Thread.sleep(200);
+                                        out.writeObject("send");
+                                        Thread.sleep(200);
                                     }
                                 }
                             }

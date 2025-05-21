@@ -9,7 +9,7 @@ public class Store implements Serializable {
     private Double latitude;
     private Double longitude;
     protected String foodCategory;
-    private Double stars;
+    Double stars;
     private int votes;
     private String logo;
     protected List<Product> products;
