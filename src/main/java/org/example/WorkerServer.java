@@ -44,12 +44,17 @@ public class WorkerServer {
                     String message = kvp.getValue();
                     int senderID = kvp.getKey();
                     if (message.startsWith("Lat::")){latitude = Double.parseDouble(message.substring(5));}
-                    else if (message.startsWith("Lon::")){longitude = Double.parseDouble(message.substring(5));
+                    else if (message.startsWith("Lon::")) {
+                        longitude = Double.parseDouble(message.substring(5));
                         if (latitude != 0 && longitude != 0 && !nearbyStores.containsKey(senderID)) {
                             List<Store> clientNearby = new ArrayList<>();
                             for (Store store1 : myStores) {if (store1.isWithin5km(latitude, longitude)) {clientNearby.add(store1);}}
-                            nearbyStores.put(senderID, clientNearby);}}
-
+                            nearbyStores.put(senderID, clientNearby);
+                        } else if (nearbyStores.containsKey(senderID)) {
+                            nearbyStores.get(senderID).clear();
+                            for (Store store1 : myStores) {if (store1.isWithin5km(latitude, longitude)) {nearbyStores.get(senderID).add(store1);}}
+                        }
+                    }
                     if (message.equalsIgnoreCase("send")) {new ActionsForWorker(nearbyStores.get(senderID), kvp).start();}
 
                     else if (message.equalsIgnoreCase("admin")) {nearbyStores.put(senderID, myStores);}
