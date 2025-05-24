@@ -9,15 +9,17 @@ public class Order implements Serializable {
     protected int customerID;
     protected String foodCategory;
     Double stars;
+    private int nrOrders = 0;
     protected Map<Product, Integer> products;
     protected int orderID;
 
-    public Order(String storeID, Double stars, int orderID, int customerID, Map<Product, Integer> products) {
+    public Order(String storeID, Double stars, int customerID, Map<Product, Integer> products) {
         this.storeID = storeID;
         this.stars = stars;
         this.products = products;
+        nrOrders++;
         this.customerID = customerID;
-        this.orderID = orderID;
+        this.orderID = nrOrders;
     }
 
     public Map<Product, Integer> getProducts() {

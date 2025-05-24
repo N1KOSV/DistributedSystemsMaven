@@ -10,6 +10,7 @@ public class customer2 extends Thread {
     double longitude;
     int userId;
     static int nrUsers = 0;
+    List<Order> myOrders = new ArrayList<>();
     boolean isAdmin;
 
     public customer2(double longitude, double latitude, boolean isAdmin) {
@@ -114,7 +115,8 @@ public class customer2 extends Thread {
                                 System.out.println("Press the corresponding number to select a store");
                                 int storeID =  Integer.parseInt(scanner.nextLine());
                                 Store myStore = getByStoreID(storeID, myStores);
-                                order(myStore);
+                                String myOrder = order(myStore);
+                                System.out.println(myOrder);
                             }
                         }
                     } catch (IOException e) {break;}}
@@ -293,11 +295,15 @@ public class customer2 extends Thread {
                 }
             }
         }
-
+        
+        StringBuilder result = new StringBuilder("neworder::" + store.getStoreID());
+        for (Map.Entry<Product, Integer> entry : cart.entrySet()) {
+            result.append("::").append(entry.getKey().getName())
+                    .append("::").append(entry.getValue());
+        }
+        myOrders.add(new Order( String.valueOf(store.storeID),4.3, userId, cart));
         System.out.println("\nFinal Order Submitted.");
-        return "Order placed. Total: " + cart.entrySet().stream()
-                .mapToDouble(e -> e.getKey().getPrice() * e.getValue())
-                .sum() + " Euros";
+        return result.toString();
     }
 
 
