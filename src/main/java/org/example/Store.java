@@ -43,6 +43,14 @@ public class Store implements Serializable {
         return products;
     }
     
+    public void registerSale(String productName, int productAmmount){
+        for (Product product : products) {
+            if (product.getName().equals(productName)) {
+                product.sell(productAmmount);
+            }
+        }
+    }
+    
     public String getAvgPrice(){
         int sum = 0;
         for (Product product : products) {
@@ -80,12 +88,12 @@ public class Store implements Serializable {
     }
     
     public void sell(int p){
-        products.get(p).sell();
+        products.get(p).sell(1);
         }
 
     @Override
     public String toString() {
-        return   name  + ": " + foodCategory + " ( " + getAvgPrice() + " ) rating: " + stars + "/5 (" + votes + ") " + "total sales: " + getTotalSales();
+        return  storeID + ". " + name  + ": " + foodCategory + " ( " + getAvgPrice() + " ) rating: " + stars + "/5 (" + votes + ") " + "total sales: " + getTotalSales();
     }
 
     public String detailedToString() {

@@ -28,7 +28,6 @@ public class customer2 extends Thread {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             out.flush();
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-            
 
             // Step 2: Send acknowledgment to MasterServer to start processing
             out.writeObject("Lat::" + String.valueOf(latitude));
@@ -116,6 +115,7 @@ public class customer2 extends Thread {
                                 int storeID =  Integer.parseInt(scanner.nextLine());
                                 Store myStore = getByStoreID(storeID, myStores);
                                 String myOrder = order(myStore);
+                                out.writeObject(myOrder);
                                 System.out.println(myOrder);
                             }
                         }
@@ -226,6 +226,7 @@ public class customer2 extends Thread {
         Scanner scanner = new Scanner(System.in);
         Map<Product, Integer> cart = new LinkedHashMap<>();
         List<Product> products = store.getProducts();
+        for (Product p: products) if (p.getAmount() == 0) products.remove(p); 
         int choice = -1;
 
         while (true) {
@@ -285,6 +286,7 @@ public class customer2 extends Thread {
                             System.out.println("Quantity must be positive.");
                             continue;
                         }
+                        if (quantity > products.get(productChoice - 1).getAmount()){ System.out.println("There are only " + products.get(productChoice - 1).getAmount() +" of "+ products.get(productChoice - 1).getName() + " available."); continue;}
                         cart.put(selectedProduct, cart.getOrDefault(selectedProduct, 0) + quantity);
                         System.out.println(quantity + "x " + selectedProduct.getName() + " added to cart.");
                     } else {
@@ -302,7 +304,6 @@ public class customer2 extends Thread {
                     .append("::").append(entry.getValue());
         }
         myOrders.add(new Order( String.valueOf(store.storeID),4.3, userId, cart));
-        System.out.println("\nFinal Order Submitted.");
         return result.toString();
     }
 

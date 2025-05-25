@@ -75,6 +75,7 @@ public class Manager extends Thread {
                             if (command.equals("2")) {
                                 Store newStore = newStore(scanner);
                                 out.writeObject(newStore);
+                                out.flush();
                             }
                             if (command.equals("3")) {
                                 System.out.println("Which store do you want to edit?");
@@ -95,7 +96,6 @@ public class Manager extends Thread {
                                 int storeID =  Integer.parseInt(scanner.nextLine());
                                 Store myStore = getByStoreID(storeID, myStores);
                                 String response = editStore(scanner, myStore);
-                                System.out.println(response);
                                 out.writeObject(response);
                             }
                             if (command.equals("4")) {out.writeObject("send");Thread.sleep(100);
@@ -183,7 +183,7 @@ public class Manager extends Thread {
             System.out.println("For the store: " + store.name);
             System.out.println("Is this information correct? Y/N");
             String answer3 = scanner.nextLine();
-            if (answer3.equals("Y")) {ready = true; return "newProd::" + store.storeID + "::" + productName + "::" + productType + "::" + productPrice + "::" + productAmount;}
+            if (answer3.equals("Y")) {return "newProd::" + store.storeID + "::" + productName + "::" + productType + "::" + productPrice + "::" + productAmount;}
         }
         }
         else if (answer2 == 2) {
@@ -247,7 +247,7 @@ return null;
         String storeLogo = scanner.nextLine();
         boolean moreProducts = true;
         int nrProducts = 0;
-        Store myStore = new Store(storeName, Double.valueOf(storeLat), Double.valueOf(storeLon), storeType, Double.valueOf(storeStars), Integer.parseInt(storeRatings), storeLogo, myStores.size());
+        Store myStore = new Store(storeName, Double.valueOf(storeLat), Double.valueOf(storeLon), storeType, Double.valueOf(storeStars), Integer.parseInt(storeRatings), storeLogo, myStores.size() + 1);
         myStores.add(myStore);
         while (moreProducts) {
             nrProducts++;
@@ -269,6 +269,7 @@ return null;
                 moreProducts = false;
             }
         }
+        myStores.add(myStore);
         return myStore;
     }
 

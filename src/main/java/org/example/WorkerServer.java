@@ -9,7 +9,7 @@ import java.util.*;
 public class WorkerServer {
 
     static List<Store> myStores = new ArrayList<>();
-    private Map<Integer, List<Store>> nearbyStores = new HashMap();
+    private final Map<Integer, List<Store>> nearbyStores = new HashMap();
     int number = 0;
     Double longitude = 0.0;
     Double latitude = 0.0;
@@ -37,41 +37,60 @@ public class WorkerServer {
                 if (received instanceof Store) {
                     Store store = (Store) received;
                     Boolean alreadyExists = false;
-                    for(Store store1 : myStores) {if (store.storeID == store1.storeID) {alreadyExists = true;}}
-                    if (!alreadyExists) {myStores.add(store);}
+                    System.out.println(store.toString());
+                    for (Store store1 : myStores) {
+                        if (store.storeID == store1.storeID) {
+                            alreadyExists = true;
+                        }
+                    }
+                    if (!alreadyExists) {
+                        myStores.add(store);
+                    }
                 } else if (received instanceof Map.Entry) {
                     Map.Entry<Integer, String> kvp = (Map.Entry<Integer, String>) received;
                     String message = kvp.getValue();
                     int senderID = kvp.getKey();
-                    if (message.startsWith("Lat::")){latitude = Double.parseDouble(message.substring(5));}
-                    else if (message.startsWith("Lon::")) {
+                    if (message.startsWith("Lat::")) {
+                        latitude = Double.parseDouble(message.substring(5));
+                    } else if (message.startsWith("Lon::")) {
                         longitude = Double.parseDouble(message.substring(5));
                         if (latitude != 0 && longitude != 0 && !nearbyStores.containsKey(senderID)) {
                             List<Store> clientNearby = new ArrayList<>();
-                            for (Store store1 : myStores) {if (store1.isWithin5km(latitude, longitude)) {clientNearby.add(store1);}}
+                            for (Store store1 : myStores) {
+                                if (store1.isWithin5km(latitude, longitude)) {
+                                    clientNearby.add(store1);
+                                }
+                            }
                             nearbyStores.put(senderID, clientNearby);
                         } else if (nearbyStores.containsKey(senderID)) {
                             nearbyStores.get(senderID).clear();
-                            for (Store store1 : myStores) {if (store1.isWithin5km(latitude, longitude)) {nearbyStores.get(senderID).add(store1);}}
+                            for (Store store1 : myStores) {
+                                if (store1.isWithin5km(latitude, longitude)) {
+                                    nearbyStores.get(senderID).add(store1);
+                                }
+                            }
                         }
                     }
-                    if (message.equalsIgnoreCase("send")) {new ActionsForWorker(nearbyStores.get(senderID), kvp).start();}
-
-                    else if (message.equalsIgnoreCase("admin")) {nearbyStores.put(senderID, myStores);}
-
-                    else if (message.startsWith("newProd::")) {
+                    if (message.equalsIgnoreCase("send")) {
+                        new ActionsForWorker(nearbyStores.get(senderID), kvp).start();
+                    } else if (message.equalsIgnoreCase("admin")) {
+                        nearbyStores.put(senderID, myStores);
+                    } else if (message.startsWith("newProd::")) {
                         String[] parts = message.split("::");
-                        for (Store store : nearbyStores.get(senderID)) {if (store.storeID == Integer.parseInt(parts[1])){
-                            store.addProduct(parts[2],parts[3],Integer.parseInt(parts[5]),Double.parseDouble(parts[4]));
-                            for (Product p : store.products) {System.out.println(p.getName() + " " + p.getPrice());}}}}
-
-                    else if (message.startsWith("changeAvailability::")) {
+                        synchronized (myStores) {
+                            for (Store store : myStores)
+                                if (store.storeID == Integer.parseInt(parts[1]))
+                                    store.addProduct(parts[2], parts[3], Integer.parseInt(parts[5]), Double.parseDouble(parts[4]));
+                        }
+                    } else if (message.startsWith("changeAvailability::")) {
                         String[] parts = message.split("::");
-                        for (Store store : nearbyStores.get(senderID)) {
-                            if (store.storeID == Integer.parseInt(parts[1])) {
-                                for (Product p : store.products) {
-                                    if (p.getName().equals(parts[2])) {p.setAmount(Integer.parseInt(parts[3]));}}
-                                for (Product p : store.products) {System.out.println(p.getName() + " " + p.getAmount());}}
+                        synchronized (myStores) {
+                            for (Store store : myStores) {
+                                if (store.storeID == Integer.parseInt(parts[1])) {
+                                    for (Product p : store.products)
+                                        if (p.getName().equals(parts[2])) p.setAmount(Integer.parseInt(parts[3]));
+                                }
+                            }
                         }
                     } else if (message.startsWith("categories::")) {
                         Map<String, List<String>> result = new HashMap<>();
@@ -79,28 +98,34 @@ public class WorkerServer {
                         for (int i = 0; i < parts.length - 1; i += 2) {
                             String key = parts[i];
                             String value = parts[i + 1];
-                            if (key.equals("ratings")) {value = value.replaceAll("[<\\s]", "");}
+                            if (key.equals("ratings")) {
+                                value = value.replaceAll("[<\\s]", "");
+                            }
                             List<String> values = Arrays.asList(value.split(","));
-                            result.put(key, values);}
-                        System.out.println("Categories: " + result.get("categories"));
+                            result.put(key, values);
+                        }
                         for (Store s : nearbyStores.get(senderID)) {
-                            if (!result.get("categories").contains(s.foodCategory) || !result.get("prices").contains(s.getAvgPrice()) || Double.parseDouble(Collections.max(result.get("ratings"))) > s.stars ) {
-                                nearbyStores.get(senderID).remove(s);
-                                System.out.println(s.toString());
+                            if (!result.get("categories").contains(s.foodCategory) || !result.get("prices").contains(s.getAvgPrice()) || Double.parseDouble(Collections.max(result.get("ratings"))) > s.stars) {
+                                synchronized (nearbyStores) {
+                                    nearbyStores.get(senderID).remove(s);
+                                }
                             }
                         }
                         new ActionsForWorker(nearbyStores.get(senderID), kvp).start();
-                    } else {
-                        System.out.println("Unknown command: " + message);
-                    }
-                } else {
-                    System.out.println("Unknown object received: " + received.getClass());
-                }
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            //System.out.println("Client disconnected or error occurred: " + e.getMessage());
-        }
-    }
+                    } else if (message.startsWith("neworder::")) {
+                        String[] parts = message.split("::");
+                        System.out.println("madeit");
+                        for (Store store : nearbyStores.get(senderID)) {
+                            if (store.storeID == Integer.parseInt(parts[1]))
+                            {synchronized (nearbyStores) {
+                                    for (int i = 2;i <= parts.length - 1;i+=2){
+                                        store.registerSale(parts[i], Integer.parseInt(parts[i+1]));
+                                        System.out.println("Sold: " + parts[i] + Integer.parseInt(parts[i+1]) );}
+                            }}}
+
+                    } else System.out.println("Unknown command: " + message);
+                } else System.out.println("Unknown object received: " + received.getClass());
+            }} catch (IOException | ClassNotFoundException e) {}}
 
     public static void main(String[] args) {
         new WorkerServer().openServer();

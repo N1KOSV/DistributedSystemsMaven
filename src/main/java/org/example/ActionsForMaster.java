@@ -94,6 +94,12 @@ public class ActionsForMaster extends Thread {
                     ObjectOutputStream tempOut = new ObjectOutputStream(baos);
                     if (receivedObject instanceof Map.Entry) {
                     tempOut.writeObject(receivedObject);
+                    Map.Entry<Integer, List<Store>> kvp = (Map.Entry<Integer, List<Store>>) receivedObject;
+                    System.out.println(kvp.getKey());
+                    List<Store> storeList = kvp.getValue();
+            //        for (Store store : storeList) {
+            //            System.out.println("THE STORE: " + store.toString());
+            //        }
                     tempOut.flush();
                     }
 

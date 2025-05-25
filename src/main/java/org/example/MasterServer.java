@@ -40,7 +40,7 @@ public class MasterServer {
 
     private void handleNewClient(Socket socket) {
         String clientAddress = socket.getInetAddress().getHostAddress();
-        String tag = clientAddress.endsWith("1") ? "1" : "2";
+        String tag = clientAddress.endsWith("1") || clientAddress.endsWith("150")? "1" : "2";
 
         try {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
@@ -78,10 +78,10 @@ public class MasterServer {
                         }
                     }
                 } else {
-                    if (received instanceof Map.Entry) {System.out.println((Integer) ((Map.Entry<Integer, ?>) received).getKey());}
-                    System.out.println(socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
+                    if (received instanceof String) {System.out.println((String) received);}
+                    
                     for (Map.Entry<Integer, ClientConnection> entry : clientConnections.entrySet()) { if (entry.getValue().socket.equals(socket)){
-                        System.out.println(entry.getKey() + " Τώρα μου μιλάει σαν γνωστή-η-η");
+                    //    System.out.println(entry.getValue() + " Τώρα μου μιλάει σαν γνωστή-η-η");
                     
                     ActionsForMaster actionThread = new ActionsForMaster(received, tag, socket, entry.getKey());
                     actionThread.start();
@@ -93,10 +93,10 @@ public class MasterServer {
             
         } finally {
             try {
-                if (!socket.isClosed()) {
+                //if (!socket.isClosed()) {
                     //socket.close();
-                    System.out.println("PTSD-ι-ι, στο σπίτι μου δεν θέλει να 'ρθεί-ι-ι");
-                }
+                //    System.out.println("PTSD-ι-ι, στο σπίτι μου δεν θέλει να 'ρθεί-ι-ι");
+                //}
             } catch (Exception e) {e.printStackTrace();}
         }
     }

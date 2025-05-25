@@ -19,9 +19,9 @@ public class Product implements Serializable {
         sales = 0;
     }
     
-    public void sell(){
-        amount -= 1;
-        sales += 1;
+    public void sell(int ammount){
+        amount -= ammount;
+        sales += ammount;
     }
     
     public int getSales() {return sales;}

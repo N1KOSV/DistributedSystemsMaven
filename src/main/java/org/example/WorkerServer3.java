@@ -38,6 +38,7 @@ public class WorkerServer3 {
                 if (received instanceof Store) {
                     Store store = (Store) received;
                     Boolean alreadyExists = false;
+                    System.out.println(store.toString());
                     for(Store store1 : myStores) {if (store.storeID == store1.storeID) {alreadyExists = true;}}
                     if (!alreadyExists) {myStores.add(store);}
                 } else if (received instanceof Map.Entry) {
@@ -57,7 +58,7 @@ public class WorkerServer3 {
                         }
                     }
                     if (message.equalsIgnoreCase("send")) {new ActionsForWorker(nearbyStores.get(senderID), kvp).start();}
-                    
+
                     else if (message.equalsIgnoreCase("admin")) {nearbyStores.put(senderID, myStores);}
 
                     else if (message.startsWith("newProd::")) {
@@ -80,23 +81,31 @@ public class WorkerServer3 {
                         for (int i = 0; i < parts.length - 1; i += 2) {
                             String key = parts[i];
                             String value = parts[i + 1];
-                            if (key.equals("ratings")) {value = value.replaceAll("[<\\s]", "");}
+                            if (key.equals("ratings")) {
+                                value = value.replaceAll("[<\\s]", "");
+                            }
                             List<String> values = Arrays.asList(value.split(","));
-                            result.put(key, values);}
-                        System.out.println("Categories: " + result.get("categories"));
+                            result.put(key, values);
+                        }
                         for (Store s : nearbyStores.get(senderID)) {
-                            if (!result.get("categories").contains(s.foodCategory) || !result.get("prices").contains(s.getAvgPrice()) || Double.parseDouble(Collections.max(result.get("ratings"))) > s.stars ) {
-                                nearbyStores.get(senderID).remove(s);
-                                System.out.println(s.toString());
+                            if (!result.get("categories").contains(s.foodCategory) || !result.get("prices").contains(s.getAvgPrice()) || Double.parseDouble(Collections.max(result.get("ratings"))) > s.stars) {
+                                synchronized (nearbyStores) {
+                                    nearbyStores.get(senderID).remove(s);
+                                }
                             }
                         }
                         new ActionsForWorker(nearbyStores.get(senderID), kvp).start();
-                        System.out.println("Prices: " + result.get("prices"));
-                        System.out.println("Ratings: " + result.get("ratings"));
-
-                    } else {
-                        System.out.println("Unknown command: " + message);
-                    }
+                    } else if (message.startsWith("neworder::")) {
+                        String[] parts = message.split("::");
+                        System.out.println("madeit");
+                        for (Store store : nearbyStores.get(senderID)) {
+                            if (store.storeID == Integer.parseInt(parts[1]))
+                            {synchronized (nearbyStores) {
+                                for (int i = 2;i <= parts.length - 1;i+=2){
+                                    store.registerSale(parts[i], Integer.parseInt(parts[i+1]));
+                                    System.out.println("Sold: " + parts[i] + Integer.parseInt(parts[i+1]) );}
+                            }}}
+                    } else System.out.println("Unknown command: " + message);
                 } else {
                     System.out.println("Unknown object received: " + received.getClass());
                 }
