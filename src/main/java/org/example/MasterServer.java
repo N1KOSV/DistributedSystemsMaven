@@ -3,7 +3,6 @@ package org.example;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,12 +45,10 @@ public class MasterServer {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
             out.flush();
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-
-            // Synchronize access to the number and clientConnections map
+            
                 if (tag.equals("1")) {
                     number++;
                     clientConnections.put(number, new ClientConnection(socket, out, in));
-                    System.out.println("Registered Master client: " + clientAddress + " with ID: " + number);
                 }
             // Handle this client's communication
             new Thread(() -> handleClient(socket, in, out, tag, clientAddress)).start();
@@ -66,38 +63,25 @@ public class MasterServer {
             Object received;
 
             while ((received = in.readObject()) != null) {
-
-                if (tag.equals("2")) {
+                if (received instanceof Map.Entry) {
                     if (!clientConnections.isEmpty()) {
-                        //System.out.println((Integer) ((Map.Entry<Integer, ?>) received).getKey());
                         ClientConnection masterConn = clientConnections.get((Integer) ((Map.Entry<Integer, ?>) received).getKey());
-                        //System.out.println(masterConn.socket.getInetAddress().getHostAddress() + ":" + masterConn.socket.getPort());
                         if (masterConn != null && !masterConn.socket.isClosed()) {
-                            ActionsForMaster actionThread = new ActionsForMaster(received, tag, masterConn.socket, number);
+                            ActionsForMaster actionThread = new ActionsForMaster(received, masterConn.socket, number);
                             actionThread.start();
                         }
                     }
                 } else {
                     if (received instanceof String) {System.out.println((String) received);}
-                    
-                    for (Map.Entry<Integer, ClientConnection> entry : clientConnections.entrySet()) { if (entry.getValue().socket.equals(socket)){
-                    //    System.out.println(entry.getValue() + " Τώρα μου μιλάει σαν γνωστή-η-η");
-                    
-                    ActionsForMaster actionThread = new ActionsForMaster(received, tag, socket, entry.getKey());
+                    for (Map.Entry<Integer, ClientConnection> entry : clientConnections.entrySet()) {
+                        if (entry.getValue().socket.equals(socket)){
+                    ActionsForMaster actionThread = new ActionsForMaster(received, socket, entry.getKey());
                     actionThread.start();
-                    } }
+                    }}
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Client disconnected or error: " + e.getMessage());
-            
-        } finally {
-            try {
-                //if (!socket.isClosed()) {
-                    //socket.close();
-                //    System.out.println("PTSD-ι-ι, στο σπίτι μου δεν θέλει να 'ρθεί-ι-ι");
-                //}
-            } catch (Exception e) {e.printStackTrace();}
         }
     }
 

@@ -9,7 +9,6 @@ import java.util.Map;
 public class ActionsForMaster extends Thread {
 
     private final Object receivedObject;
-    private final String situation;
     private Socket socket;
     private final int number;
 
@@ -19,9 +18,8 @@ public class ActionsForMaster extends Thread {
         running = false;
     }
 
-    public ActionsForMaster(Object receivedObject, String situation, Socket socket, int number) {
+    public ActionsForMaster(Object receivedObject, Socket socket, int number) {
         this.receivedObject = receivedObject;
-        this.situation = situation;
         this.socket = socket;
         this.number = number;
     }
@@ -29,7 +27,7 @@ public class ActionsForMaster extends Thread {
 
     @Override
     public void run() {
-        if (situation.equals("1")) {
+        if (receivedObject instanceof String || receivedObject instanceof Store) {
             try {
                 int port = 5014;
                 String ip = "127.0.0.1";
@@ -47,13 +45,11 @@ public class ActionsForMaster extends Thread {
                     }
                     Socket workerSocket = new Socket(ip, port);
                     ObjectOutputStream out = new ObjectOutputStream(workerSocket.getOutputStream());
-
                     out.writeObject(receivedObject);
                     out.flush();
-
                     workerSocket.close();
                     stopThread();
-                } else if (receivedObject instanceof String) {
+                } else {
                     String receivedOrder = (String) receivedObject;
                     System.out.println(number + " Has ordered " + receivedOrder);
                     Socket workerSocket1 = new Socket("127.0.0.1", 5014);
@@ -69,27 +65,18 @@ public class ActionsForMaster extends Thread {
                     out2.flush();
                     out3.writeObject(kvp);
                     out3.flush();
-                    //System.out.println("Sent to WorkerS: " + kvp.getClass().getSimpleName());
-
-                    // Close all worker sockets
                     workerSocket1.close();
                     workerSocket2.close();
                     workerSocket3.close();
                     stopThread();
-                    //}
                 }
-            
-                
             } catch (IOException e) {
                 System.out.println("Failed to send to worker");
                 e.printStackTrace();
             }
-
         } else {
             try {
-                // Make sure we have a valid socket and it's open
                 if (socket != null && !socket.isClosed()) {
-                    // Use a special technique to avoid stream corruption, We'll need to create a temporary ByteArrayOutputStream to hold the serialized object
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     ObjectOutputStream tempOut = new ObjectOutputStream(baos);
                     if (receivedObject instanceof Map.Entry) {
@@ -102,14 +89,12 @@ public class ActionsForMaster extends Thread {
             //        }
                     tempOut.flush();
                     }
-
-                    // Now write the length and bytes to the socket output stream
+                    
                     DataOutputStream socketOut = new DataOutputStream(socket.getOutputStream());
                     byte[] serializedObject = baos.toByteArray();
                     socketOut.writeInt(serializedObject.length);
                     socketOut.write(serializedObject);
                     socketOut.flush();
-                    // Don't close the socket here - let the MasterServer handle that
                 } else {
                     System.out.println("Error: Socket is null or closed, cannot forward to Master");
                 }
