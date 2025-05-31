@@ -7,12 +7,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MasterServer {
-    // Map to track client connections by address
+    // Map για client connections με key που αυξάνεται
     private Map<Integer, ClientConnection> clientConnections = new ConcurrentHashMap<>();
-    int number = 0;
+    private int clientCounter = 0;
 
-    // Class to hold both socket and its streams
-    private static class ClientConnection {
+    public static class ClientConnection {
         Socket socket;
         ObjectOutputStream out;
         ObjectInputStream in;
@@ -38,50 +37,71 @@ public class MasterServer {
     }
 
     private void handleNewClient(Socket socket) {
-        String clientAddress = socket.getInetAddress().getHostAddress();
-        String tag = clientAddress.endsWith("1") || clientAddress.endsWith("150")? "1" : "2";
-
         try {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.flush();
+            out.flush();  // flush important για Object streams
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-            
-                if (tag.equals("1")) {
-                    number++;
-                    clientConnections.put(number, new ClientConnection(socket, out, in));
-                }
-            // Handle this client's communication
-            new Thread(() -> handleClient(socket, in, out, tag, clientAddress)).start();
+
+            // Αυξάνουμε με ασφάλεια τον μετρητή clients
+            int clientKey = getNextClientKey();
+            clientConnections.put(clientKey, new ClientConnection(socket, out, in));
+            System.out.println("New client connected with key: " + clientKey);
+
+            // Τρέχουμε χειρισμό για τον client (αναγνώσεις)
+            handleClient(clientKey);
 
         } catch (IOException e) {
             System.out.println("Error setting up client connection: " + e.getMessage());
         }
     }
 
-    private void handleClient(Socket socket, ObjectInputStream in, ObjectOutputStream out, String tag, String clientAddress) {
-        try {
-            Object received;
+    private synchronized int getNextClientKey() {
+        return ++clientCounter;
+    }
 
+    private void handleClient(int clientKey) {
+        ClientConnection clientConn = clientConnections.get(clientKey);
+        if (clientConn == null) return;
+
+        try {
+            ObjectInputStream in = clientConn.in;
+            ObjectOutputStream out = clientConn.out;
+            Socket socket = clientConn.socket;
+
+            Object received;
             while ((received = in.readObject()) != null) {
                 if (received instanceof Map.Entry) {
-                    if (!clientConnections.isEmpty()) {
-                        ClientConnection masterConn = clientConnections.get((Integer) ((Map.Entry<Integer, ?>) received).getKey());
-                        if (masterConn != null && !masterConn.socket.isClosed()) {
-                            ActionsForMaster actionThread = new ActionsForMaster(received, masterConn.socket, number);
-                            actionThread.start();
-                        }
+                    // Πάρε key από Map.Entry και βρες connection που θες να στείλεις
+                    int targetKey = (Integer) ((Map.Entry<?, ?>) received).getKey();
+                    ClientConnection targetConn = clientConnections.get(targetKey);
+                    if (targetConn != null && !targetConn.socket.isClosed()) {
+                        // Στείλε με ActionsForMaster, περάστε το σωστό targetKey
+                        ActionsForMaster actionThread = new ActionsForMaster(received, targetConn, targetKey);
+                        actionThread.start();
+                    } else {
+                        System.out.println("No connection found for key " + targetKey);
                     }
-                } else {
-                    if (received instanceof String) {System.out.println((String) received);}
-                    for (Map.Entry<Integer, ClientConnection> entry : clientConnections.entrySet()) {
-                        if (entry.getValue().socket.equals(socket)){
-                    ActionsForMaster actionThread = new ActionsForMaster(received, socket, entry.getKey());
+                } else if (received instanceof String) {
+                    System.out.println("Client " + clientKey + " sent String: " + received);
+
+                    // Εδώ μπορείς να στείλεις κάτι σε workers όπως πριν
+                    ActionsForMaster actionThread = new ActionsForMaster(received, clientConn, clientKey);
                     actionThread.start();
-                    }}
+                } else if (received instanceof Store) {
+                    System.out.println("Client " + clientKey + " sent Store object");
+
+                    ActionsForMaster actionThread = new ActionsForMaster(received, clientConn, clientKey);
+                    actionThread.start();
+                } else {
+                    System.out.println("Unknown object received from client " + clientKey);
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Client disconnected or error: " + e.getMessage());
+            System.out.println("Client " + clientKey + " disconnected or error: " + e.getMessage());
+            clientConnections.remove(clientKey);
+            try {
+                clientConn.socket.close();
+            } catch (IOException ignored) {}
         }
     }
 

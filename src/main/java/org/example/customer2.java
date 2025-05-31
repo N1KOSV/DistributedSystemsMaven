@@ -1,132 +1,165 @@
 package org.example;
 
-import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
 
 public class customer2 extends Thread {
-    double latitude;
-    double longitude;
-    int userId;
-    static int nrUsers = 0;
-    List<Order> myOrders = new ArrayList<>();
-    boolean isAdmin;
+    private double latitude;
+    private double longitude;
+    private int userId;
+    private static int nrUsers = 0;
+    private List<Order> myOrders = new ArrayList<>();
+    private boolean isAdmin;
+    private List<Store> myStores = new ArrayList<>();
 
     public customer2(double longitude, double latitude, boolean isAdmin) {
         this.longitude = longitude;
         this.latitude = latitude;
-        nrUsers++;
         this.isAdmin = isAdmin;
-        userId = nrUsers;}
-    
-    boolean allresults = true;
-    @Override
-    public void run() {
-        Scanner scanner = new Scanner(System.in);
-        try (Socket socket = new Socket("127.0.0.11", 5012)) {
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.flush();
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-
-            // Step 2: Send acknowledgment to MasterServer to start processing
-            out.writeObject("Lat::" + String.valueOf(latitude));
-            out.flush();
-            out.writeObject("Lon::" + String.valueOf(longitude));
-            out.flush();
-            Thread.sleep(300);
-
-            try {
-                DataInputStream dataIn = new DataInputStream(socket.getInputStream());
-
-                while (true) {
-                    try {
-                        if (dataIn.available() > 0) {
-                            int dataLength = dataIn.readInt();
-                            byte[] data = new byte[dataLength];
-                            dataIn.readFully(data);
-                            ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(data));
-                            Object receivedObject = objIn.readObject();
-                            if (receivedObject instanceof Map.Entry<?,?>) {
-                                Map.Entry<Integer,List<?>> entry = (Map.Entry <Integer,List<?>>) receivedObject;
-                                List<Store> tempList = (List<Store>) entry.getValue();
-                                if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {
-                                    System.out.println("STORE LIST: ");
-                                    for (Store store : tempList) {
-                                        System.out.println(store.name);
-                                    }
-                                }
-                            }
-                            else{
-                            }
-                        }
-                        if (allresults) {
-                            System.out.println("What do you want to do?");
-                            System.out.println("1. See all the stores");
-                            System.out.println("2. Apply Filters");
-                            System.out.println("3. Clear Filters");
-                            System.out.println("4. Order");
-                            String command = scanner.nextLine();
-                            System.out.println(command);
-                            if (command.equals("1")) {out.writeObject("send");Thread.sleep(200);}
-                            if (command.equals("2")) {out.writeObject("send");Thread.sleep(200);
-                                int dataLength = dataIn.readInt();
-                                byte[] data = new byte[dataLength];
-                                dataIn.readFully(data);
-                                ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(data));
-                                Object receivedObject = objIn.readObject();
-                                if (receivedObject instanceof Map.Entry<?,?>) {
-                                    Map.Entry<Integer, List<?>> entry = (Map.Entry<Integer, List<?>>) receivedObject;
-                                    List<Store> tempList = (List<Store>) entry.getValue();
-                                    tempList.sort(Comparator.comparingInt(Store::getStoreID));
-                                    if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {
-                                        int i = 0;
-                                        String storeCategories = "categories::" + getStoreCategories(tempList);
-                                        String storePriceRanges = "prices::" + getRanges(List.of("$","$$","$$$"));
-                                        String storeRatingRanges = "ratings::" + getRanges(List.of("0","1","2","3","4","5"));
-                                        out.writeObject(storeCategories + "::" + storePriceRanges + "::" + storeRatingRanges);
-                                        Thread.sleep(200);
-                                        out.writeObject("send");
-                                        Thread.sleep(200);
-                                    }
-                                }
-                            }
-                            else if (command.equals("3")) {
-                                out.writeObject("Lat::" + String.valueOf(latitude));
-                                out.flush();
-                                out.writeObject("Lon::" + String.valueOf(longitude));
-                                out.flush();
-                                out.writeObject("send");
-                                Thread.sleep(300);
-                            }
-                            if (command.equals("4")) {out.writeObject("send");Thread.sleep(100);
-                                int dataLength = dataIn.readInt();
-                                byte[] data = new byte[dataLength];
-                                dataIn.readFully(data);
-                                ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(data));
-                                Object receivedObject = objIn.readObject();
-                                if (receivedObject instanceof Map.Entry<?,?>) {
-                                    Map.Entry<Integer,List<?>> entry = (Map.Entry <Integer,List<?>>) receivedObject;
-                                    List<Store> tempList = (List<Store>) entry.getValue();
-                                    tempList.sort(Comparator.comparingInt(Store::getStoreID));
-                                    myStores = tempList;
-                                    if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {for (Store store : tempList) {System.out.println(store.storeID + ". " + store.name);}}}
-                                System.out.println("Press the corresponding number to select a store");
-                                int storeID =  Integer.parseInt(scanner.nextLine());
-                                Store myStore = getByStoreID(storeID, myStores);
-                                String myOrder = order(myStore);
-                                out.writeObject(myOrder);
-                                System.out.println(myOrder);
-                            }
-                        }
-                    } catch (IOException e) {break;}}
-            } catch (Exception e) {System.out.println("Connection closed or error: " + e.getMessage());}
-        } catch (IOException e) {e.printStackTrace();} catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        synchronized (customer2.class) {
+            nrUsers++;
+            userId = nrUsers;
         }
     }
 
-    static List<Store> myStores = new ArrayList<Store>();
+    @Override
+    public void run() {
+        Scanner scanner = new Scanner(System.in);
+        try (Socket socket = new Socket("127.0.0.11", 5012);
+             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+             ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
+
+            // Στέλνουμε αρχικά latitude και longitude στον server
+            out.writeObject("Lat::" + latitude);
+            out.flush();
+            out.writeObject("Lon::" + longitude);
+            out.flush();
+
+            // Κύριο loop για επιλογές χρήστη
+            while (true) {
+                System.out.println("\nWhat do you want to do?");
+                System.out.println("1. See all the stores");
+                System.out.println("2. Apply Filters");
+                System.out.println("3. Clear Filters");
+                System.out.println("4. Order");
+                System.out.println("0. Exit");
+                System.out.print("Your choice: ");
+
+                String command = scanner.nextLine().trim();
+
+                if (command.equals("0")) {
+                    System.out.println("Exiting...");
+                    break;
+                }
+
+                switch (command) {
+                    case "1":
+                        // Ζητάμε λίστα καταστημάτων
+                        out.writeObject("send");
+                        out.flush();
+                        receiveAndPrintStores(in);
+                        break;
+
+                    case "2":
+                        // Ζητάμε φίλτρα (προετοιμασία)
+                        out.writeObject("send");
+                        out.flush();
+                        List<Store> storesForFilters = receiveStores(in);
+                        if (storesForFilters != null && !storesForFilters.isEmpty()) {
+                            String categories = getStoreCategories(storesForFilters);
+                            String prices = getRanges(Arrays.asList("$", "$$", "$$$"));
+                            String ratings = getRanges(Arrays.asList("0", "1", "2", "3", "4", "5"));
+                            String filterMessage = "categories::" + categories + "::prices::" + prices + "::ratings::" + ratings;
+                            out.writeObject(filterMessage);
+                            out.flush();
+                            // Μετά ζητάμε ξανά filtered stores
+                            out.writeObject("send");
+                            out.flush();
+                            receiveAndPrintStores(in);
+                        } else {
+                            System.out.println("No stores to filter.");
+                        }
+                        break;
+
+                    case "3":
+                        // Καθαρίζουμε φίλτρα, ξαναστέλνουμε αρχικές συντεταγμένες
+                        out.writeObject("Lat::" + latitude);
+                        out.flush();
+                        out.writeObject("Lon::" + longitude);
+                        out.flush();
+                        out.writeObject("send");
+                        out.flush();
+                        receiveAndPrintStores(in);
+                        break;
+
+                    case "4":
+                        // Παραγγελία: παίρνουμε καταστήματα και επιλέγουμε
+                        out.writeObject("send");
+                        out.flush();
+                        myStores = receiveStores(in);
+                        if (myStores == null || myStores.isEmpty()) {
+                            System.out.println("No stores available.");
+                            break;
+                        }
+                        myStores.sort(Comparator.comparingInt(Store::getStoreID));
+                        System.out.println("Stores:");
+                        for (Store s : myStores) {
+                            System.out.println(s.getStoreID() + ". " + s.getName());
+                        }
+                        System.out.print("Select store by number: ");
+                        try {
+                            int storeID = Integer.parseInt(scanner.nextLine());
+                            Store selectedStore = getByStoreID(storeID, myStores);
+                            if (selectedStore == null) {
+                                System.out.println("Invalid store selection.");
+                                break;
+                            }
+                            String orderStr = order(selectedStore);
+                            out.writeObject(orderStr);
+                            out.flush();
+                            System.out.println("Order sent: " + orderStr);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid input.");
+                        }
+                        break;
+
+                    default:
+                        System.out.println("Invalid command.");
+                        break;
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Connection error or exception: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void receiveAndPrintStores(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        List<Store> stores = receiveStores(in);
+        if (stores == null || stores.isEmpty()) {
+            System.out.println("No stores received.");
+            return;
+        }
+        System.out.println("STORE LIST:");
+        for (Store s : stores) {
+            System.out.println(s.getName());
+        }
+    }
+
+    private List<Store> receiveStores(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        Object obj = in.readObject();
+        if (obj instanceof Map.Entry<?, ?>) {
+            Map.Entry<Integer, List<?>> entry = (Map.Entry<Integer, List<?>>) obj;
+            List<?> list = entry.getValue();
+            if (!list.isEmpty() && list.get(0) instanceof Store) {
+                //noinspection unchecked
+                return (List<Store>) list;
+            }
+        }
+        return Collections.emptyList();
+    }
 
     public static String getStoreCategories(List<Store> myStores) {
         List<String> categories = new ArrayList<>();
@@ -177,81 +210,87 @@ public class customer2 extends Thread {
     }
 
     public static String getRanges(List<String> options) {
-        List<Integer> selectedIndexes = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
+        List<Integer> selectedIndexes = new ArrayList<>();
 
-        System.out.println("Select the price ranges you are interested in:");
-        System.out.println("Type the number to toggle selection. Type 0 to finish.");
+        System.out.println("Select ranges to filter (type number to toggle, 0 to finish):");
 
         int choice;
         do {
-            // Display options with current selection state
             for (int i = 0; i < options.size(); i++) {
                 String prefix = selectedIndexes.contains(i) ? "✅ " : (i + 1) + ". ";
                 System.out.println(prefix + options.get(i));
             }
-
-            // Read user input
-            choice = scanner.nextInt();
-
+            choice = readIntSafe(scanner);
             if (choice > 0 && choice <= options.size()) {
-                int index = choice - 1;
-                if (selectedIndexes.contains(index)) {
-                    selectedIndexes.remove(Integer.valueOf(index));
+                if (selectedIndexes.contains(choice - 1)) {
+                    selectedIndexes.remove(Integer.valueOf(choice - 1));
                 } else {
-                    selectedIndexes.add(index);
+                    selectedIndexes.add(choice - 1);
                 }
             } else if (choice != 0) {
-                System.out.println("Invalid choice. Try again.");
+                System.out.println("Invalid choice.");
             }
-
         } while (choice != 0);
 
-        // Build and return comma-separated selected price ranges
-        List<String> selectedPrices = new ArrayList<>();
-        for (int index : selectedIndexes) {
-            selectedPrices.add(options.get(index));
+        List<String> selected = new ArrayList<>();
+        for (int idx : selectedIndexes) {
+            selected.add(options.get(idx));
         }
-        return String.join(",", selectedPrices);
+        return String.join(",", selected);
     }
 
-
+    private static int readIntSafe(Scanner scanner) {
+        while (true) {
+            try {
+                return Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid number.");
+            }
+        }
+    }
 
     public Store getByStoreID(int storeID, List<Store> stores) {
-        for (Store store : stores) {if (store.storeID == storeID){return store;}}
+        for (Store store : stores) {
+            if (store.getStoreID() == storeID) return store;
+        }
         return null;
     }
 
     public String order(Store store) {
         Scanner scanner = new Scanner(System.in);
         Map<Product, Integer> cart = new LinkedHashMap<>();
-        List<Product> products = store.getProducts();
-        for (Product p: products) if (p.getAmount() == 0) products.remove(p); 
-        int choice = -1;
+        List<Product> products = new ArrayList<>(store.getProducts());
+
+        // Remove products with zero stock
+        products.removeIf(p -> p.getAmount() == 0);
 
         while (true) {
-            // Display cart
             System.out.println("\n--- Your Cart ---");
-            double total = 0;
             if (cart.isEmpty()) {
                 System.out.println("Cart is empty.");
             } else {
+                double total = 0;
                 for (Map.Entry<Product, Integer> entry : cart.entrySet()) {
                     Product product = entry.getKey();
-                    int quantity = entry.getValue();
-                    double price = quantity * product.getPrice();
-                    System.out.println(quantity + "x " + product.getName() + " " + price + " €");
+                    int qty = entry.getValue();
+                    double price = qty * product.getPrice();
+                    System.out.println(qty + "x " + product.getName() + " - " + price + " €");
                     total += price;
                 }
                 System.out.println("-----\nTotal: " + total + " €");
             }
 
             System.out.println("\n--- Menu ---");
-            for (int i = 0; i < products.size(); i++) {System.out.println((i + 1) + ". Add " + products.get(i).getName());}
+            for (int i = 0; i < products.size(); i++) {
+                System.out.println((i + 1) + ". Add " + products.get(i).getName());
+            }
             System.out.println("R. Remove product from cart");
             System.out.println("0. Submit order");
             System.out.print("Your choice: ");
+
             String input = scanner.nextLine().trim();
+
             if (input.equals("0")) {
                 break;
             } else if (input.equalsIgnoreCase("R")) {
@@ -260,9 +299,9 @@ public class customer2 extends Thread {
                     System.out.println((i + 1) + ". " + products.get(i).getName());
                 }
                 try {
-                    int removeChoice = Integer.parseInt(scanner.nextLine());
-                    if (removeChoice >= 1 && removeChoice <= products.size()) {
-                        Product toRemove = products.get(removeChoice - 1);
+                    int removeIdx = Integer.parseInt(scanner.nextLine());
+                    if (removeIdx >= 1 && removeIdx <= products.size()) {
+                        Product toRemove = products.get(removeIdx - 1);
                         if (cart.containsKey(toRemove)) {
                             cart.remove(toRemove);
                             System.out.println(toRemove.getName() + " removed from cart.");
@@ -281,14 +320,17 @@ public class customer2 extends Thread {
                     if (productChoice >= 1 && productChoice <= products.size()) {
                         Product selectedProduct = products.get(productChoice - 1);
                         System.out.print("Enter quantity: ");
-                        int quantity = Integer.parseInt(scanner.nextLine());
-                        if (quantity <= 0) {
+                        int qty = Integer.parseInt(scanner.nextLine());
+                        if (qty <= 0) {
                             System.out.println("Quantity must be positive.");
                             continue;
                         }
-                        if (quantity > products.get(productChoice - 1).getAmount()){ System.out.println("There are only " + products.get(productChoice - 1).getAmount() +" of "+ products.get(productChoice - 1).getName() + " available."); continue;}
-                        cart.put(selectedProduct, cart.getOrDefault(selectedProduct, 0) + quantity);
-                        System.out.println(quantity + "x " + selectedProduct.getName() + " added to cart.");
+                        if (qty > selectedProduct.getAmount()) {
+                            System.out.println("Only " + selectedProduct.getAmount() + " of " + selectedProduct.getName() + " available.");
+                            continue;
+                        }
+                        cart.put(selectedProduct, cart.getOrDefault(selectedProduct, 0) + qty);
+                        System.out.println(qty + "x " + selectedProduct.getName() + " added to cart.");
                     } else {
                         System.out.println("Invalid product number.");
                     }
@@ -297,34 +339,18 @@ public class customer2 extends Thread {
                 }
             }
         }
-        
-        StringBuilder result = new StringBuilder("neworder::" + store.getStoreID());
+
+        StringBuilder sb = new StringBuilder("neworder::" + store.getStoreID());
         for (Map.Entry<Product, Integer> entry : cart.entrySet()) {
-            result.append("::").append(entry.getKey().getName())
-                    .append("::").append(entry.getValue());
+            sb.append("::").append(entry.getKey().getName())
+              .append("::").append(entry.getValue());
         }
-        myOrders.add(new Order( String.valueOf(store.storeID),4.3, userId, cart));
-        return result.toString();
+        myOrders.add(new Order(String.valueOf(store.getStoreID()), 4.3, userId, cart));
+        return sb.toString();
     }
 
-
-
-    public static void seeAvailableStores(double lon, double lat, int buckets) {
-        // Calculate distance or apply filters based on lon and lat if needed
-        for (int i = 0; i < myStores.size(); i++) {
-            System.out.println((i + 1) + ". " + myStores.get(i).toString() + " bucket: " + myStores.get(i).storeID % buckets);
-        }
-    }
-
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
-        System.out.println("Welcome to the food ordering app!");
-        System.out.println("Please enter your coordinates");
-        System.out.println("What is your latitude?");
-        Scanner scanner = new Scanner(System.in);
-        Double latitude = Double.parseDouble(scanner.nextLine());
-        System.out.println("What is your longitude?");
-        Double longitude = Double.parseDouble(scanner.nextLine());
-        customer2 manager = new customer2(longitude, latitude, false);
-        manager.start();
+    public static void main(String[] args) {
+        customer2 client = new customer2(23.76, 38.01, false);
+        client.start();
     }
 }

@@ -5,300 +5,254 @@ import java.net.Socket;
 import java.util.*;
 
 public class Manager extends Thread {
-    double latitude;
-    double longitude;
-    int userId;
-    static int nrUsers = 0;
-    boolean isAdmin;
+    private static final String SERVER_HOST = "127.0.0.1";
+    private static final int SERVER_PORT = 5012;
+
+    private double latitude;
+    private double longitude;
+    private boolean isAdmin;
+    private int userId;
+
+    private static int nrUsers = 0;
+    private static List<Store> myStores = new ArrayList<>();
 
     public Manager(double longitude, double latitude, boolean isAdmin) {
         this.longitude = longitude;
         this.latitude = latitude;
-        nrUsers++;
         this.isAdmin = isAdmin;
-        userId = nrUsers;
+        userId = ++nrUsers;
     }
-    boolean allresults = true;
+
     @Override
     public void run() {
-        Scanner scanner = new Scanner(System.in);
-        try (Socket socket = new Socket("127.0.0.1", 5012)) {
+        try (
+            Socket socket = new Socket(SERVER_HOST, SERVER_PORT);
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.flush();
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+            Scanner scanner = new Scanner(System.in)
+        ) {
+            out.flush();  // always flush after ObjectOutputStream init
 
-            // Step 1: Send Store to MasterServer
+            // Αποστολή των Stores στην αρχή
             for (Store store : myStores) {
                 out.writeObject(store);
                 out.flush();
                 System.out.println("Sent store: " + store.name);
             }
-            System.out.println("Master sent Store to MasterServer");
-            
-            out.flush();
+
+            // Δήλωση admin mode
             out.writeObject("admin");
             out.flush();
-            Thread.sleep(100);
-            
-            try {
-                DataInputStream dataIn = new DataInputStream(socket.getInputStream());
 
-                while (true) {
-                    try {
-                        if (dataIn.available() > 0) {
-                            int dataLength = dataIn.readInt();
-                            byte[] data = new byte[dataLength];
-                            dataIn.readFully(data);
-                            ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(data));
-                            Object receivedObject = objIn.readObject();
-                            if (receivedObject instanceof Map.Entry<?,?>) {
-                                Map.Entry<Integer,List<?>> entry = (Map.Entry <Integer,List<?>>) receivedObject;
-                                List<Store> tempList = (List<Store>) entry.getValue();
-                                if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {
-                                    for (Store store : tempList) {
-                                        System.out.println("Processed (And by that I mean received) store: " + store.name);
-                                    }
-                                }
-                            }
-                            else{
-                            }
-                        }
-                        if (allresults) {
-                            System.out.println("What do you want to do?");
-                            System.out.println("1. See all the stores");
-                            System.out.println("2. Add a new store");
-                            System.out.println("3. Edit a store");
-                            System.out.println("4. View store details");
-                            String command = scanner.nextLine();
-                            System.out.println(command);
-                            if (command.equals("1")) {out.writeObject("send");Thread.sleep(100);}
-                            if (command.equals("2")) {
-                                Store newStore = newStore(scanner);
-                                out.writeObject(newStore);
-                                out.flush();
-                            }
-                            if (command.equals("3")) {
-                                System.out.println("Which store do you want to edit?");
-                                out.writeObject("send");
-                                Thread.sleep(100);
-                                int dataLength = dataIn.readInt();
-                                byte[] data = new byte[dataLength];
-                                dataIn.readFully(data);
-                                ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(data));
-                                Object receivedObject = objIn.readObject();
-                                if (receivedObject instanceof Map.Entry<?,?>) {
-                                    Map.Entry<Integer,List<?>> entry = (Map.Entry <Integer,List<?>>) receivedObject;
-                                    List<Store> tempList = (List<Store>) entry.getValue();
-                                    tempList.sort(Comparator.comparingInt(Store::getStoreID));
-                                    myStores = tempList;
-                                    if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {for (Store store : tempList) {System.out.println(store.storeID + ". " + store.name);}}}
-                                System.out.println("Press the corresponding number to select a store");
-                                int storeID =  Integer.parseInt(scanner.nextLine());
-                                Store myStore = getByStoreID(storeID, myStores);
-                                String response = editStore(scanner, myStore);
-                                out.writeObject(response);
-                            }
-                            if (command.equals("4")) {out.writeObject("send");Thread.sleep(100);
-                                int dataLength = dataIn.readInt();
-                                byte[] data = new byte[dataLength];
-                                dataIn.readFully(data);
-                                ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(data));
-                                Object receivedObject = objIn.readObject();
-                                if (receivedObject instanceof Map.Entry<?,?>) {
-                                    Map.Entry<Integer,List<?>> entry = (Map.Entry <Integer,List<?>>) receivedObject;
-                                    List<Store> tempList = (List<Store>) entry.getValue();
-                                    tempList.sort(Comparator.comparingInt(Store::getStoreID));
-                                    myStores = tempList;
-                                    if (!tempList.isEmpty() && tempList.get(0) instanceof Store) {for (Store store : tempList) {System.out.println(store.storeID + ". " + store.name);}}}
-                                System.out.println("Press the corresponding number to select a store");
-                                int storeID =  Integer.parseInt(scanner.nextLine());
-                                Store myStore = getByStoreID(storeID, myStores);
-                                System.out.println(myStore.detailedToString());
-                            }
-                        }      
-                    } catch (IOException e) {break;}}
-            } catch (Exception e) {System.out.println("Connection closed or error: " + e.getMessage());}
-        } catch (IOException e) {e.printStackTrace();} catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            while (true) {
+                showMenu();
+                String command = scanner.nextLine();
+
+                switch (command) {
+                    case "1":
+                        requestAllStores(out);
+                        receiveStores(in);
+                        break;
+                    case "2":
+                        Store newStore = createNewStore(scanner);
+                        out.writeObject(newStore);
+                        out.flush();
+                        break;
+                    case "3":
+                        editStoreProcess(scanner, out, in);
+                        break;
+                    case "4":
+                        viewStoreDetails(scanner, out, in);
+                        break;
+                    default:
+                        System.out.println("Invalid option.");
+                }
+            }
+
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Connection error: " + e.getMessage());
         }
     }
-    
-    static List<Store> myStores = new ArrayList<Store>();
 
-    public static void read(String path) throws IOException {
-        File folder = new File(path);
-        if (folder.exists() && folder.isDirectory()) {
-            File[] files = folder.listFiles((dir, name) -> name.startsWith("Store") && name.endsWith(".json"));
-            if (files != null) {
-                // Ταξινόμηση των αρχείων με βάση τον αριθμό στο όνομα (π.χ. Store1, Store2, ...)
-                Arrays.sort(files, Comparator.comparingInt(file ->
-                        Integer.parseInt(file.getName().replaceAll("[^0-9]", "")))
-                );
-                int id = 0;
-                for (File file : files) {
-                    Parser parser = new Parser(file.getPath());
-                    String[] myData = parser.getStore();
-                    String[][] myProducts = parser.getProducts();
+    private void showMenu() {
+        System.out.println("\nWhat do you want to do?");
+        System.out.println("1. See all the stores");
+        System.out.println("2. Add a new store");
+        System.out.println("3. Edit a store");
+        System.out.println("4. View store details");
+        System.out.print("> ");
+    }
 
-                    Store myStore = new Store(
-                            myData[0], Double.parseDouble(myData[1]), Double.parseDouble(myData[2]),
-                            myData[3], Double.parseDouble(myData[4]), Integer.parseInt(myData[5]),
-                            myData[6], id + 1
-                    );
-                    id++;
-                    for (String[] myProdData : myProducts) {
-                        Product myProduct = new Product(
-                                myProdData[0], myProdData[1], Integer.parseInt(myProdData[2]),
-                                Double.parseDouble(myProdData[3])
-                        );
-                        myStore.addProduct(myProduct);
-                    }
-                    myStores.add(myStore);
-                }
+    private void requestAllStores(ObjectOutputStream out) throws IOException {
+        out.writeObject("send");
+        out.flush();
+    }
+
+    private void receiveStores(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        Object receivedObject = in.readObject();
+        if (receivedObject instanceof Map.Entry<?, ?> entry) {
+            List<?> list = (List<?>) entry.getValue();
+            if (!list.isEmpty() && list.get(0) instanceof Store) {
+                List<Store> storeList = (List<Store>) list;
+                storeList.sort(Comparator.comparingInt(Store::getStoreID));
+                myStores = storeList;
+                storeList.forEach(s -> System.out.println(s.storeID + ". " + s.name));
             }
         }
     }
 
-    public String editStore(Scanner scanner, Store store) {
-        Boolean ready = false;
+    private void editStoreProcess(Scanner scanner, ObjectOutputStream out, ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        requestAllStores(out);
+        receiveStores(in);
+
+        System.out.print("Select store ID to edit: ");
+        int storeID = Integer.parseInt(scanner.nextLine());
+        Store store = getByStoreID(storeID);
+
+        if (store == null) {
+            System.out.println("Store not found.");
+            return;
+        }
+
+        String command = editStore(scanner, store);
+        if (command != null) {
+            out.writeObject(command);
+            out.flush();
+        }
+    }
+
+    private void viewStoreDetails(Scanner scanner, ObjectOutputStream out, ObjectInputStream in)
+            throws IOException, ClassNotFoundException {
+        requestAllStores(out);
+        receiveStores(in);
+
+        System.out.print("Select store ID to view details: ");
+        int storeID = Integer.parseInt(scanner.nextLine());
+        Store store = getByStoreID(storeID);
+
+        if (store != null) {
+            System.out.println(store.detailedToString());
+        } else {
+            System.out.println("Store not found.");
+        }
+    }
+
+    private Store getByStoreID(int id) {
+        return myStores.stream()
+            .filter(s -> s.getStoreID() == id)
+            .findFirst()
+            .orElse(null);
+    }
+
+    private String editStore(Scanner scanner, Store store) {
         System.out.println("What do you want to edit?");
         System.out.println("1. Add a new product");
         System.out.println("2. Edit a product quantity");
-        int answer2 = Integer.parseInt(scanner.nextLine());
-        if (answer2 == 1) {
-        while (!ready) {
-            System.out.println("Enter the product name");
-            String productName = scanner.nextLine();
-            System.out.println("Enter the product type");
-            String productType = scanner.nextLine();
-            System.out.println("Enter the product price");
-            String productPrice = scanner.nextLine();
-            System.out.println("Enter the product amount");
-            String productAmount = scanner.nextLine();
-            System.out.println("This is your product: ");
-            System.out.println("Name: " + productName);
-            System.out.println("Type: " + productType);
-            System.out.println("Price: " + productPrice + " €");
-            System.out.println("Amount: " + productAmount + " pcs");
-            System.out.println("For the store: " + store.name);
-            System.out.println("Is this information correct? Y/N");
-            String answer3 = scanner.nextLine();
-            if (answer3.equals("Y")) {return "newProd::" + store.storeID + "::" + productName + "::" + productType + "::" + productPrice + "::" + productAmount;}
-        }
-        }
-        else if (answer2 == 2) {
-            int i = 0;
-            System.out.println("Select the product to edit");
-            for (Product p : store.getProducts()) {i++; System.out.println(i + ". " + p.getName());}
-            answer2 = Integer.parseInt(scanner.nextLine());
-            Product myProduct = store.getProducts().get(answer2 - 1);
-            System.out.println("How much of " + myProduct.getName() + " is in stock?");
-            int answer3 = Integer.parseInt(scanner.nextLine());
-            return "changeAvailability::" + store.storeID + "::" + myProduct.getName() + "::" + answer3;
-        }
-return null;
-    }
+        System.out.print("> ");
+        int choice = Integer.parseInt(scanner.nextLine());
 
-    public void sell() {
-        Scanner scanner = new Scanner(System.in);
-        int i = 1;
-        myStores.sort(Comparator.comparingInt(Store::getStoreID));
-        for (Store store : myStores) {
-            System.out.println(i + ". " + store.name);
-            i++;
-        }
-        System.out.println("Which store would you like to edit?");
-        int answer = Integer.parseInt(scanner.nextLine());
-        i = 0;
-        for (Product product : myStores.get(answer - 1).getProducts()) {
-            i++;
-            System.out.println(i + ". " + product.getName());
-        }
-        int answer2 = Integer.parseInt(scanner.nextLine());
-        myStores.get(answer - 1).sell(answer2 - 1);
-        i = 0;
-        for (Store store : myStores) {
-            System.out.println(i + ". " + myStores.get(i).toString());
-            i++;
-        }
-    }
+        if (choice == 1) {
+            System.out.print("Product name: ");
+            String name = scanner.nextLine();
+            System.out.print("Product type: ");
+            String type = scanner.nextLine();
+            System.out.print("Price: ");
+            String price = scanner.nextLine();
+            System.out.print("Amount: ");
+            String amount = scanner.nextLine();
 
+            System.out.println("Add this product to " + store.name + "? (Y/N)");
+            if (scanner.nextLine().equalsIgnoreCase("Y")) {
+                return "newProd::" + store.storeID + "::" + name + "::" + type + "::" + price + "::" + amount;
+            }
+        } else if (choice == 2) {
+            for (int i = 0; i < store.getProducts().size(); i++) {
+                System.out.println((i + 1) + ". " + store.getProducts().get(i).getName());
+            }
 
-    public Store getByStoreID(int storeID, List<Store> stores) {
-        for (Store store : stores) {if (store.storeID == storeID){return store;}}
+            System.out.print("Select product: ");
+            int index = Integer.parseInt(scanner.nextLine()) - 1;
+            Product product = store.getProducts().get(index);
+
+            System.out.print("New quantity for " + product.getName() + ": ");
+            int qty = Integer.parseInt(scanner.nextLine());
+
+            return "changeAvailability::" + store.storeID + "::" + product.getName() + "::" + qty;
+        }
+
         return null;
     }
 
+    private Store createNewStore(Scanner scanner) {
+        System.out.print("Store name: ");
+        String name = scanner.nextLine();
+        System.out.print("Type: ");
+        String type = scanner.nextLine();
+        System.out.print("Latitude: ");
+        double lat = Double.parseDouble(scanner.nextLine());
+        System.out.print("Longitude: ");
+        double lon = Double.parseDouble(scanner.nextLine());
+        System.out.print("Stars: ");
+        double stars = Double.parseDouble(scanner.nextLine());
+        System.out.print("Ratings: ");
+        int ratings = Integer.parseInt(scanner.nextLine());
+        System.out.print("Logo: ");
+        String logo = scanner.nextLine();
 
-    public Store newStore(Scanner scanner) throws IOException {
-        System.out.println("Enter the name of the store");
-        String storeName = scanner.nextLine();
-        System.out.println("Enter the type of store");
-        String storeType = scanner.nextLine();
-        System.out.println("Enter the latitude");
-        String storeLat = scanner.nextLine();
-        System.out.println("Enter the longitude");
-        String storeLon = scanner.nextLine();
-        System.out.println("Enter the stars");
-        String storeStars = scanner.nextLine();
-        System.out.println("Enter the ratings");
-        String storeRatings = scanner.nextLine();
-        System.out.println("Enter the logo");
-        String storeLogo = scanner.nextLine();
-        boolean moreProducts = true;
-        int nrProducts = 0;
-        Store myStore = new Store(storeName, Double.valueOf(storeLat), Double.valueOf(storeLon), storeType, Double.valueOf(storeStars), Integer.parseInt(storeRatings), storeLogo, myStores.size() + 1);
-        myStores.add(myStore);
-        while (moreProducts) {
-            nrProducts++;
-            System.out.println("Enter the product name");
-            String productName = scanner.nextLine();
-            System.out.println("Enter the product type");
-            String productType = scanner.nextLine();
-            System.out.println("Enter the product price");
-            String productPrice = scanner.nextLine();
-            System.out.println("Enter the product amount");
-            String productAmount = scanner.nextLine();
-            System.out.println("Is there another product? \n Y: Yes\n N: No");
-            if (nrProducts == 1) {
-                myStore.addProduct(productName, productType, Integer.parseInt(productAmount), Double.parseDouble(productPrice));
-            } else {
-                myStore.addProduct(productName, productType, Integer.parseInt(productAmount), Double.parseDouble(productPrice));
+        Store store = new Store(name, lat, lon, type, stars, ratings, logo, myStores.size() + 1);
+
+        while (true) {
+            System.out.print("Add a product? (Y/N): ");
+            if (!scanner.nextLine().equalsIgnoreCase("Y")) break;
+
+            System.out.print("Product name: ");
+            String pname = scanner.nextLine();
+            System.out.print("Type: ");
+            String ptype = scanner.nextLine();
+            System.out.print("Price: ");
+            double price = Double.parseDouble(scanner.nextLine());
+            System.out.print("Amount: ");
+            int amount = Integer.parseInt(scanner.nextLine());
+
+            store.addProduct(pname, ptype, amount, price);
+        }
+
+        myStores.add(store);
+        return store;
+    }
+
+    public static void readStoresFromFolder(String path) throws IOException {
+        File folder = new File(path);
+        if (!folder.isDirectory()) return;
+
+        File[] files = folder.listFiles((dir, name) -> name.startsWith("Store") && name.endsWith(".json"));
+        if (files == null) return;
+
+        Arrays.sort(files, Comparator.comparingInt(file ->
+                Integer.parseInt(file.getName().replaceAll("[^0-9]", "")))
+        );
+
+        int id = 1;
+        for (File file : files) {
+            Parser parser = new Parser(file.getPath());
+            String[] data = parser.getStore();
+            String[][] products = parser.getProducts();
+
+            Store store = new Store(data[0], Double.parseDouble(data[1]), Double.parseDouble(data[2]),
+                    data[3], Double.parseDouble(data[4]), Integer.parseInt(data[5]), data[6], id++);
+
+            for (String[] p : products) {
+                store.addProduct(new Product(p[0], p[1], Integer.parseInt(p[2]), Double.parseDouble(p[3])));
             }
-            if (scanner.nextLine().equals("N")) {
-                moreProducts = false;
-            }
-        }
-        myStores.add(myStore);
-        return myStore;
-    }
 
-    public void seeAllAvailableStores() {
-        for (int i = 0; i < myStores.size(); i++) {
-            System.out.println((i + 1) + ". " + myStores.get(i).toString());
+            myStores.add(store);
         }
     }
 
-    public static Set<String> getStoreCategories() {
-        Set<String> categories = new HashSet<>();
-        for (Store store : myStores) {
-            categories.add(store.foodCategory);
-        }
-        return categories;
-    }
-
-    public static void seeAvailableStores(double lon, double lat, int buckets) {
-        // Calculate distance or apply filters based on lon and lat if needed
-        for (int i = 0; i < myStores.size(); i++) {
-            System.out.println((i + 1) + ". " + myStores.get(i).toString() + " bucket: " + myStores.get(i).storeID % buckets);
-        }
-    }
-
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
-        Manager manager = new Manager(23.333, 21.2478, false);
-        int buckets = 3;
-        manager.read("src/main/resources");
-        manager.seeAvailableStores(23.333, 21.2478, buckets);
+    public static void main(String[] args) throws IOException {
+        Manager manager = new Manager(23.333, 21.2478, true);
+        readStoresFromFolder("src/main/resources");
         manager.start();
     }
 }

@@ -26,6 +26,10 @@ public class Store implements Serializable {
         this.products = new ArrayList<>();
         this.storeID = storeID;
     }
+    
+    public String getName(){
+        return name;
+    }
 
     public void addProduct(String name, String type, int amount ,Double price){
         products.add(new Product(name,type,amount,price));
