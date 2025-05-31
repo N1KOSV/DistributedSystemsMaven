@@ -30,62 +30,51 @@ class ActionsForReducer extends Thread {
     }
 
     public void run() {
-        try {
-            ObjectInputStream workerIn = new ObjectInputStream(socket.getInputStream());
-            System.out.println("Reducer: Connection received");
-            Object receivedObject;
-            while (running && (receivedObject = workerIn.readObject()) != null) {
-                if (receivedObject instanceof Map.Entry) {
-                    System.out.println("Map entry received");
-                    // Extract key and value from the Map.Entry
-                    Map.Entry<?, ?> entry = (Map.Entry<?, ?>) receivedObject;
-                    int key = (int) entry.getKey();
-                    List<Store> tempList = (List<Store>) entry.getValue();
-                    if (tempList != null) {
-                    if (!tempList.isEmpty()) {
-                        // Cast to the correct type
+    try (ObjectInputStream workerIn = new ObjectInputStream(socket.getInputStream())) {
+        System.out.println("Reducer: Connection received");
 
-                        // Aggregate the data with the same key
-                        synchronized (aggregatedData) {
-                            if (!aggregatedData.containsKey(key)) {
-                                aggregatedData.put(key, new ArrayList<>());
-                            }
-                            aggregatedData.get(key).addAll(tempList);
+        Object receivedObject = workerIn.readObject();  // διαβάζει 1 αντικείμενο
 
-                            // Update message count for this key
-                            messageCountPerKey.put(key,
-                                    messageCountPerKey.getOrDefault(key, 0) + 1);
+        if (receivedObject instanceof Map.Entry) {
+            System.out.println("Map entry received");
+            Map.Entry<?, ?> entry = (Map.Entry<?, ?>) receivedObject;
+            int key = (int) entry.getKey();
+            List<Store> tempList = (List<Store>) entry.getValue();
 
-                            System.out.println("Key: " + key + ", Message count: " +
-                                    messageCountPerKey.get(key));
+            if (tempList != null && !tempList.isEmpty()) {
+                synchronized (aggregatedData) {
+                    aggregatedData.putIfAbsent(key, new ArrayList<>());
+                    aggregatedData.get(key).addAll(tempList);
 
-                            // When we've received all expected messages for this key, forward to master
-                            if (messageCountPerKey.get(key) >= EXPECTED_MESSAGES_PER_KEY) {
-                                forwardToMaster(key, aggregatedData.get(key));
-                                // Clear data for this key after sending
-                                aggregatedData.remove(key);
-                                messageCountPerKey.remove(key);
-                            }
-                        }
+                    messageCountPerKey.put(key,
+                        messageCountPerKey.getOrDefault(key, 0) + 1);
+
+                    System.out.println("Key: " + key + ", Message count: " + messageCountPerKey.get(key));
+
+                    if (messageCountPerKey.get(key) >= EXPECTED_MESSAGES_PER_KEY) {
+                        forwardToMaster(key, aggregatedData.get(key));
+                        aggregatedData.remove(key);
+                        messageCountPerKey.remove(key);
                     }
                 }
             }
+        }
+
+    } catch (IOException | ClassNotFoundException e) {
+        System.out.println("Actions for Reducer failed.");
+        e.printStackTrace();
+    } finally {
+        stopThread();
+        try {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
             }
-            socket.close();
-        } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Actions for Reducer failed.");
-            e.printStackTrace();
-        } finally {
-            stopThread();
-            try {
-                if (socket != null && !socket.isClosed()) {
-                    socket.close();
-                }
-            } catch (IOException e) {
-                System.out.println("Failed to close client socket.");
-            }
+        } catch (IOException e) {
+            System.out.println("Failed to close client socket.");
         }
     }
+}
+
 
     private void forwardToMaster(int key, List<Store> storeList) {
         try (Socket masterSocket = new Socket(MASTER_HOST, MASTER_PORT);
