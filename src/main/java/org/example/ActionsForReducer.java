@@ -30,6 +30,11 @@ class ActionsForReducer extends Thread {
     }
 
     public void run() {
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     try (ObjectInputStream workerIn = new ObjectInputStream(socket.getInputStream())) {
         System.out.println("Reducer: Connection received");
 
@@ -40,6 +45,10 @@ class ActionsForReducer extends Thread {
             Map.Entry<?, ?> entry = (Map.Entry<?, ?>) receivedObject;
             int key = (int) entry.getKey();
             List<Store> tempList = (List<Store>) entry.getValue();
+
+            for (Store s : tempList){
+                System.out.println(s.getName());
+            }
 
             if (tempList != null && !tempList.isEmpty()) {
                 synchronized (aggregatedData) {

@@ -2,32 +2,32 @@
 "StoreName": "Ha Long Bay",
 "Latitude": 38.01677, 
 "Longitude": 23.75182,
-"FoodCategory": "chinese",
+"FoodCategory": "Chinese",
 "Stars": 4.8,
 "NoOfVotes": 118,
 "StoreLogo": "/usr/bin/images/haLongBay.png",
 "Products": [
 {
-"ProductName": "chicken noodles",
-"ProductType": "noodles",
+"ProductName": "Chicken Noodles",
+"ProductType": "Noodles",
 "Available Amount": 90,
 "Price": 7
 },
 {
-"ProductName": "duck noodles",
-"ProductType": "noodles",
+"ProductName": "Duck noodles",
+"ProductType": "Noodles",
 "Available Amount": 80,
 "Price": 9.5
 },
 {
-"ProductName": "spring rolls",
-"ProductType": "snack",
+"ProductName": "Spring Rolls",
+"ProductType": "Snack",
 "Available Amount": 100,
 "Price": 4.6
 },
 {
-  "ProductName": "nigiri sushi",
-  "ProductType": "sushi",
+  "ProductName": "Nigiri Sushi",
+  "ProductType": "Sushi",
   "Available Amount": 88,
   "Price": 4.6
 }

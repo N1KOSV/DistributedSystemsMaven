@@ -3,26 +3,26 @@
     "StoreName": "Psitolixoudies",
     "Latitude": 38.045056,
     "Longitude": 23.678278,
-    "FoodCategory": "souvlatzidiko",
+    "FoodCategory": "Souvlatzidiko",
     "Stars": 4.6,
    "NoOfVotes": 313,
     "StoreLogo": "/usr/bin/images/psitoli.png",
    "Products": [
    {
-    "ProductName": "gyros pork wrap",
-   "ProductType": "souvlaki",
+    "ProductName": "Pork Gyros",
+   "ProductType": "Souvlaki",
    "Available Amount": 500,
     "Price": 3.4
    },
    {
-    "ProductName": "gyros chicken wrap ",
-   "ProductType": "souvlaki",
+    "ProductName": "Chicken Gyros",
+   "ProductType": "Souvlaki",
    "Available Amount": 400,
     "Price": 3.4
    },
    {
-    "ProductName": "greek Salad",
-   "ProductType": "salad",
+    "ProductName": "Greek Salad",
+   "ProductType": "Salad",
    "Available Amount": 100,
     "Price": 7
    }

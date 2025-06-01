@@ -2,26 +2,26 @@
 "StoreName": "Wallstreet Athens",
 "Latitude": 38.014783,
 "Longitude": 23.821248,
-"FoodCategory": "burgers",
+"FoodCategory": "Burgers",
 "Stars": 4.8,
 "NoOfVotes": 317,
 "StoreLogo": "/usr/bin/images/Wallstreet_Athens.png",
 "Products": [
 {
-"ProductName": "chicken pesto",
-"ProductType": "pasta",
+"ProductName": "Pasta Chicken Pesto",
+"ProductType": "Pasta",
 "Available Amount": 50,
 "Price": 12
 },
 {
-"ProductName": "Wallstreet burger",
-"ProductType": "burger",
+"ProductName": "Wallstreet Burger",
+"ProductType": "Burger",
 "Available Amount": 100,
 "Price": 13
 },
 {
-"ProductName": "Legendary Angus burger",
-"ProductType": "burger",
+"ProductName": "Legendary Angus Burger",
+"ProductType": "Burger",
 "Available Amount": 40,
 "Price": 16
 },

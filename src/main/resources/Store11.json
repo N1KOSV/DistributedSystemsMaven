@@ -1,28 +1,28 @@
 
 {
-    "StoreName": "Oti prepei",
+    "StoreName": "Oti Prepei",
     "Latitude": 38.041722,
     "Longitude": 23.685306,
-    "FoodCategory": "creperie",
+    "FoodCategory": "Creperie",
     "Stars": 4.2,
    "NoOfVotes": 1405,
     "StoreLogo": "/usr/bin/images/otiprepei.png",
    "Products": [
    {
-    "ProductName": "crepe chockolate biscuit",
-   "ProductType": "sweet crepe",
+    "ProductName": "Crepe Chockolate Biscuit",
+   "ProductType": "Sweet Crepe",
    "Available Amount": 220,
     "Price": 5
    },
    {
-    "ProductName": "chicken tomato cheese crepe",
-   "ProductType": "sour crepe",
+    "ProductName": "Chicken Tomato Cheese Crepe",
+   "ProductType": "Crepe",
    "Available Amount": 150,
     "Price": 5.4
    },
    {
     "ProductName": "Ceasar’s Salad",
-   "ProductType": "salad",
+   "ProductType": "Salad",
    "Available Amount": 100,
     "Price": 7.3
    }

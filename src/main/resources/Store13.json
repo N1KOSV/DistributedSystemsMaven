@@ -1,29 +1,29 @@
 {
-"StoreName": "storeName",
-"Latitude": 37.9932963,
-"Longitude": 23.733413,
-"FoodCategory": "pizzeria",
-"Stars": 3,
-"NoOfVotes": 15,
+"StoreName": "BurgerKing",
+"Latitude": 38.0013160,
+"Longitude": 23.843204,
+"FoodCategory": "Burger",
+"Stars": 4.15,
+"NoOfVotes": 25,
 "StoreLogo": "/usr/bin/images/storeLogo.png",
 "Products": [
 {
-"ProductName": "margarita",
-"ProductType": "pizza",
-"Available Amount": 5000,
-"Price": 9.2
+"ProductName": "Chicken Burger",
+"ProductType": "Burger",
+"Available Amount": 50,
+"Price": 6.4
 },
 {
-"ProductName": "special",
-"ProductType": "pizza",
-"Available Amount": 1000,
-"Price": 12
+"ProductName": "Cheese Burger",
+"ProductType": "Burger",
+"Available Amount": 10,
+"Price": 5.3
 },
 {
-"ProductName": "chef’s Salad",
-"ProductType": "salad",
-"Available Amount": 100,
-"Price": 5
+"ProductName": "Chiken Salad",
+"ProductType": "Salad",
+"Available Amount": 8,
+"Price": 7.8
 }
 ]
 }

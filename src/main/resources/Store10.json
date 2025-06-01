@@ -3,26 +3,26 @@
     "StoreName": "FGK",
     "Latitude": 38.042805,
     "Longitude": 23.682944,
-    "FoodCategory": "burgers",
+    "FoodCategory": "Burgers",
     "Stars": 4.7,
    "NoOfVotes": 352,
     "StoreLogo": "/usr/bin/images/FGK.png",
    "Products": [
    {
-    "ProductName": "chicken burger",
-   "ProductType": "burger",
+    "ProductName": "Chicken Burger",
+   "ProductType": "Burger",
    "Available Amount": 80,
     "Price": 7.5
    },
    {
-    "ProductName": "double smash cheeseburger",
-   "ProductType": "burger",
+    "ProductName": "Double Smash Cheeseburger",
+   "ProductType": "Burger",
    "Available Amount": 90,
     "Price": 6.8
    },
    {
-    "ProductName": "village hot dog",
-   "ProductType": "salad",
+    "ProductName": "village Salad",
+   "ProductType": "Salad",
    "Available Amount": 70,
     "Price": 6.5
    }

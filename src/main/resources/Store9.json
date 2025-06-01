@@ -2,26 +2,26 @@
     "StoreName": "Cosmos Pizza",
     "Latitude": 38.040000,
     "Longitude": 23.690250,
-    "FoodCategory": "pizzeria",
+    "FoodCategory": "Pizzeria",
     "Stars": 4.4,
    "NoOfVotes": 187,
     "StoreLogo": "/usr/bin/images/cosmos-pizza.png",
    "Products": [
    {
-    "ProductName": "margarita",
-   "ProductType": "pizza",
+    "ProductName": "Pizza Margarita",
+   "ProductType": "Pizza",
    "Available Amount": 120,
     "Price": 5.8
    },
    {
-    "ProductName": "special",
-   "ProductType": "pizza",
+    "ProductName": "Pizza Special",
+   "ProductType": "Pizza",
    "Available Amount": 100,
     "Price": 7.5
    },
    {
-    "ProductName": "chef’s Salad",
-   "ProductType": "salad",
+    "ProductName": "Chef’s Salad",
+   "ProductType": "Salad",
    "Available Amount": 30,
     "Price": 7
    }

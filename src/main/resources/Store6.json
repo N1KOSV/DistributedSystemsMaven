@@ -2,26 +2,26 @@
 "StoreName": "Holy crepes",
 "Latitude": 38.0013154,
 "Longitude": 23.843204,
-"FoodCategory": "creperie",
+"FoodCategory": "Creperie",
 "Stars": 4.3,
 "NoOfVotes": 173,
 "StoreLogo": "/usr/bin/images/Holy_crepes.png",
 "Products": [
 {
-"ProductName": "Holy chiken",
-"ProductType": "crepe",
+"ProductName": "Holy Chicken",
+"ProductType": "Crepe",
 "Available Amount": 500,
 "Price": 6.4
 },
 {
-"ProductName": "Holy model",
-"ProductType": "crepe",
+"ProductName": "Holy Model",
+"ProductType": "Crepe",
 "Available Amount": 100,
 "Price": 5.7
 },
 {
 "ProductName": "My Pancakes",
-"ProductType": "pancake",
+"ProductType": "Pancake",
 "Available Amount": 70,
 "Price": 4
 }

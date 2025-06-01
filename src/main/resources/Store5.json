@@ -2,32 +2,32 @@
 "StoreName": "Arancini",
 "Latitude": 38.003736,
 "Longitude": 23.878179,
-"FoodCategory": "pizzeria",
+"FoodCategory": "Pizzeria",
 "Stars": 4.8,
 "NoOfVotes": 96,
 "StoreLogo": "/usr/bin/images/storeLogo.png",
 "Products": [
 {
-"ProductName": "bianca",
-"ProductType": "pizza",
+"ProductName": "Pizza Bianca",
+"ProductType": "Pizza",
 "Available Amount": 500,
 "Price": 15
 },
 {
-"ProductName": "pepperoni",
-"ProductType": "pizza",
+"ProductName": "Pizza Pepperoni",
+"ProductType": "Pizza",
 "Available Amount": 100,
 "Price": 13
 },
 {
-"ProductName": "ceasar’s Salad",
-"ProductType": "salad",
+"ProductName": "Ceasar’s Salad",
+"ProductType": "Salad",
 "Available Amount": 80,
 "Price": 7
 },
 {
-"ProductName": "Bolognese",
-"ProductType": "pasta",
+"ProductName": "Pasta Bolognese",
+"ProductType": "Pasta",
 "Available Amount": 180,
 "Price": 8
 }
