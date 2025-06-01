@@ -21,8 +21,7 @@ public class WorkerServer2 {
             while (true) {
                 number++;
                 Socket socket = serverSocket.accept();
-                new Thread(() -> handleClient(socket)).start(); // Handle each client on a separate thread
-                //System.out.println("Connection #" + number);
+                new Thread(() -> handleClient(socket)).start();
             }
 
         } catch (IOException e) {
@@ -63,13 +62,20 @@ public class WorkerServer2 {
                     
                     else if (message.startsWith("newProd::")) {
                         String[] parts = message.split("::");
-                        for (Store store : nearbyStores.get(senderID)) {if (store.storeID == Integer.parseInt(parts[1])){
-                            store.addProduct(parts[2],parts[3],Integer.parseInt(parts[5]),Double.parseDouble(parts[4]));
-                            for (Product p : store.products) {System.out.println(p.getName() + " " + p.getPrice());}}}}
-                    
+                        synchronized (myStores) {
+                            for (Store store : myStores) {
+                                if (store.storeID == Integer.parseInt(parts[1])) {
+                                    store.addProduct(parts[2], parts[3], Integer.parseInt(parts[5]), Double.parseDouble(parts[4]));
+                                    for (Product p : store.products) {
+                                        System.out.println(p.getName() + " " + p.getPrice());
+                                    }
+                                }
+                            }
+                        }
+                    }
                     else if (message.startsWith("changeAvailability::")) {
                         String[] parts = message.split("::");
-                        for (Store store : nearbyStores.get(senderID)) {
+                        for (Store store : myStores) {
                             if (store.storeID == Integer.parseInt(parts[1])) {
                                 for (Product p : store.products) {
                                     if (p.getName().equals(parts[2])) {p.setAmount(Integer.parseInt(parts[3]));}}
@@ -97,9 +103,9 @@ public class WorkerServer2 {
                         new ActionsForWorker(nearbyStores.get(senderID), kvp).start();
                     } else if (message.startsWith("neworder::")) {
                         String[] parts = message.split("::");
-                        for (Store store : nearbyStores.get(senderID)) {
+                        for (Store store : myStores) {
                             if (store.storeID == Integer.parseInt(parts[1]))
-                            {synchronized (nearbyStores) {
+                            {synchronized (myStores) {
                                 for (int i = 2;i <= parts.length - 1;i+=2){
                                     store.registerSale(parts[i], Integer.parseInt(parts[i+1]));
                                     System.out.println("Sold: " + parts[i] + Integer.parseInt(parts[i+1]) );}
@@ -111,7 +117,6 @@ public class WorkerServer2 {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            //System.out.println("Client disconnected or error occurred: " + e.getMessage());
         }
     }
 

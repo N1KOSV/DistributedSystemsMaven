@@ -18,9 +18,7 @@ public class Worker extends Thread {
             in = new ObjectInputStream(socket.getInputStream());
 
             String message = (String) in.readObject();
-            //System.out.println(message);
-
-
+            
         } catch (IOException | ClassNotFoundException e) {
             System.out.println("Worker failed.");
             e.printStackTrace();

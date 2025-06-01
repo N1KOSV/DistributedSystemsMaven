@@ -30,13 +30,11 @@ public class customer2 extends Thread {
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
 
-            // Στέλνουμε αρχικά latitude και longitude στον server
             out.writeObject("Lat::" + latitude);
             out.flush();
             out.writeObject("Lon::" + longitude);
             out.flush();
 
-            // Κύριο loop για επιλογές χρήστη
             while (true) {
                 System.out.println("\nWhat do you want to do?");
                 System.out.println("1. See all the stores");
@@ -55,14 +53,12 @@ public class customer2 extends Thread {
 
                 switch (command) {
                     case "1":
-                        // Ζητάμε λίστα καταστημάτων
                         out.writeObject("send");
                         out.flush();
                         receiveAndPrintStores(in);
                         break;
 
                     case "2":
-                        // Ζητάμε φίλτρα (προετοιμασία)
                         out.writeObject("send");
                         out.flush();
                         List<Store> storesForFilters = receiveStores(in);
@@ -73,7 +69,6 @@ public class customer2 extends Thread {
                             String filterMessage = "categories::" + categories + "::prices::" + prices + "::ratings::" + ratings;
                             out.writeObject(filterMessage);
                             out.flush();
-                            // Μετά ζητάμε ξανά filtered stores
                             out.writeObject("send");
                             out.flush();
                             receiveAndPrintStores(in);
@@ -83,7 +78,6 @@ public class customer2 extends Thread {
                         break;
 
                     case "3":
-                        // Καθαρίζουμε φίλτρα, ξαναστέλνουμε αρχικές συντεταγμένες
                         out.writeObject("Lat::" + latitude);
                         out.flush();
                         out.writeObject("Lon::" + longitude);
@@ -94,7 +88,6 @@ public class customer2 extends Thread {
                         break;
 
                     case "4":
-                        // Παραγγελία: παίρνουμε καταστήματα και επιλέγουμε
                         out.writeObject("send");
                         out.flush();
                         myStores = receiveStores(in);
@@ -154,7 +147,6 @@ public class customer2 extends Thread {
             Map.Entry<Integer, List<?>> entry = (Map.Entry<Integer, List<?>>) obj;
             List<?> list = entry.getValue();
             if (!list.isEmpty() && list.get(0) instanceof Store) {
-                //noinspection unchecked
                 return (List<Store>) list;
             }
         }
@@ -165,27 +157,23 @@ public class customer2 extends Thread {
         List<String> categories = new ArrayList<>();
         List<Integer> catPicks = new ArrayList<>();
         Scanner scanner = new Scanner(System.in);
-
-        // Collect unique food categories
+        
         for (Store store : myStores) {
             if (!categories.contains(store.foodCategory)) {
                 categories.add(store.foodCategory);
             }
         }
-
-        // Show instructions
+        
         System.out.println("Which categories do you want to search for?");
         System.out.println("Type the number to toggle selection. Type 0 to finish.");
 
         int choice;
         do {
-            // Print categories with checkmarks
             for (int i = 0; i < categories.size(); i++) {
                 String prefix = catPicks.contains(i) ? "✅ " : (i + 1) + ". ";
                 System.out.println(prefix + categories.get(i));
             }
-
-            // Read input
+            
             choice = scanner.nextInt();
 
             if (choice > 0 && choice <= categories.size()) {
@@ -200,8 +188,7 @@ public class customer2 extends Thread {
             }
 
         } while (choice != 0);
-
-        // Build and return the comma-separated string of selected categories
+        
         List<String> selectedCategories = new ArrayList<>();
         for (int index : catPicks) {
             selectedCategories.add(categories.get(index));
@@ -261,8 +248,7 @@ public class customer2 extends Thread {
         Scanner scanner = new Scanner(System.in);
         Map<Product, Integer> cart = new LinkedHashMap<>();
         List<Product> products = new ArrayList<>(store.getProducts());
-
-        // Remove products with zero stock
+        
         products.removeIf(p -> p.getAmount() == 0);
 
         while (true) {

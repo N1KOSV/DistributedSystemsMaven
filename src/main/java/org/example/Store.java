@@ -57,12 +57,18 @@ public class Store implements Serializable {
     
     public String getAvgPrice(){
         int sum = 0;
-        for (Product product : products) {
-            sum += product.getPrice();
+        if (products.size() > 0) {
+            for (Product product : products) {
+                sum += product.getPrice();
+            }
+            if (sum / products.size() < 5) {
+                return "$";
+            } else if (sum / products.size() < 10) {
+                return "$$";
+            }
+            return "$$$";
         }
-        if (sum/products.size() < 5){return "$";}
-        else if (sum/products.size() < 10){return "$$";}
-        return "$$$";
+        return "no data";
     }
     
     public int getTotalSales(){
@@ -71,7 +77,7 @@ public class Store implements Serializable {
          return sales;}
 
     public boolean isWithin5km(double lat, double lon) {
-        final int R = 6371; // Radius of the earth in km
+        final int R = 6371;
 
         double latDistance = Math.toRadians(latitude - lat);
         double lonDistance = Math.toRadians(longitude - lon);

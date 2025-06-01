@@ -9,13 +9,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 class ActionsForReducer extends Thread {
     Socket socket;
-
-    // Static maps shared across all ActionsForReducer instances
+    
     private static final Map<Integer, List<Store>> aggregatedData = new ConcurrentHashMap<>();
     private static final Map<Integer, Integer> messageCountPerKey = new ConcurrentHashMap<>();
     private static final int EXPECTED_MESSAGES_PER_KEY = 3;
-
-    // Master server details
+    
     private static final String MASTER_HOST = "127.0.0.2";
     private static final int MASTER_PORT = 5012;
 
@@ -38,7 +36,7 @@ class ActionsForReducer extends Thread {
     try (ObjectInputStream workerIn = new ObjectInputStream(socket.getInputStream())) {
         System.out.println("Reducer: Connection received");
 
-        Object receivedObject = workerIn.readObject();  // διαβάζει 1 αντικείμενο
+        Object receivedObject = workerIn.readObject();
 
         if (receivedObject instanceof Map.Entry) {
             System.out.println("Map entry received");

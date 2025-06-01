@@ -31,16 +31,14 @@ public class Manager extends Thread {
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
             Scanner scanner = new Scanner(System.in)
         ) {
-            out.flush();  // always flush after ObjectOutputStream init
-
-            // Αποστολή των Stores στην αρχή
+            out.flush();
+            
             for (Store store : myStores) {
                 out.writeObject(store);
                 out.flush();
                 System.out.println("Sent store: " + store.name);
             }
-
-            // Δήλωση admin mode
+            
             out.writeObject("admin");
             out.flush();
 

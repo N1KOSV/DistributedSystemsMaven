@@ -10,7 +10,7 @@ public class Product implements Serializable {
     private int amount;
     private Double price;
     private int sales;
-    
+
     public Product(String name, String type, int amount , Double price) {
         this.name = name;
         this.type = type;
@@ -18,12 +18,12 @@ public class Product implements Serializable {
         this.price = price;
         sales = 0;
     }
-    
+
     public void sell(int ammount){
         amount -= ammount;
         sales += ammount;
     }
-    
+
     public int getSales() {return sales;}
 
     public Double getPrice() {return price;}
@@ -33,17 +33,24 @@ public class Product implements Serializable {
     public String getType() {return type;}
 
     public int getAmount() {return amount;}
-    
+
     public void setAmount(int newAmm) {amount =  newAmm;}
-    
+
     public String toString() {
         return name + ": " + type + " " + price + " € " + " (" + amount + " available units) " ;
     }
-    
+
     public String detailedToString() {
-        return "\nNAME: " + name + 
-        "\tPRICE: " + price +
-        "\tTYPE: " + type +
-        "\tTOTAL SALES: " + sales;
+        return "\nNAME: " + name +
+                "\tPRICE: " + price +
+                "\tTYPE: " + type +
+                "\tTOTAL SALES: " + sales;
+    }
+
+    public String detailedToStringAndroid() {
+        return "\nNAME: " + name +
+                "\nPRICE: " + price +
+                "€\nTYPE: " + type +
+                "\nTOTAL SALES: " + sales;
     }
 }

@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MasterServer {
-    // Map για client connections με key που αυξάνεται
     private Map<Integer, ClientConnection> clientConnections = new ConcurrentHashMap<>();
     private int clientCounter = 0;
 
@@ -39,15 +38,13 @@ public class MasterServer {
     private void handleNewClient(Socket socket) {
         try {
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.flush();  // flush important για Object streams
+            out.flush();
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-
-            // Αυξάνουμε με ασφάλεια τον μετρητή clients
+            
             int clientKey = getNextClientKey();
             clientConnections.put(clientKey, new ClientConnection(socket, out, in));
             System.out.println("New client connected with key: " + clientKey);
-
-            // Τρέχουμε χειρισμό για τον client (αναγνώσεις)
+            
             handleClient(clientKey);
 
         } catch (IOException e) {
@@ -71,11 +68,9 @@ public class MasterServer {
             Object received;
             while ((received = in.readObject()) != null) {
                 if (received instanceof Map.Entry) {
-                    // Πάρε key από Map.Entry και βρες connection που θες να στείλεις
                     int targetKey = (Integer) ((Map.Entry<?, ?>) received).getKey();
                     ClientConnection targetConn = clientConnections.get(targetKey);
                     if (targetConn != null && !targetConn.socket.isClosed()) {
-                        // Στείλε με ActionsForMaster, περάστε το σωστό targetKey
                         ActionsForMaster actionThread = new ActionsForMaster(received, targetConn, targetKey);
                         actionThread.start();
                     } else {
@@ -84,7 +79,6 @@ public class MasterServer {
                 } else if (received instanceof String) {
                     System.out.println("Client " + clientKey + " sent String: " + received);
 
-                    // Εδώ μπορείς να στείλεις κάτι σε workers όπως πριν
                     ActionsForMaster actionThread = new ActionsForMaster(received, clientConn, clientKey);
                     actionThread.start();
                 } else if (received instanceof Store) {

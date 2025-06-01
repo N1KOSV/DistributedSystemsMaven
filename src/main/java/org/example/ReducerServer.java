@@ -25,7 +25,6 @@ public class ReducerServer {
 
                 Thread m = new ActionsForReducer(socket);
                 m.start();
-                //if (mssgsReceived )
             }
         } catch (IOException e) {
             e.printStackTrace();

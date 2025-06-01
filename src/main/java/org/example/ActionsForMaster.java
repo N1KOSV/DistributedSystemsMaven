@@ -57,8 +57,7 @@ public class ActionsForMaster extends Thread {
                     }
                 }
             } else {
-                // Εδώ λαμβάνουμε αποτελέσματα που πρέπει να στείλουμε στον client (Android/Manager)
-                synchronized (clientConn.out) { // για ασφάλεια νημάτων
+                synchronized (clientConn.out) {
                     clientConn.out.writeObject(receivedObject);
                     clientConn.out.flush();
                 }

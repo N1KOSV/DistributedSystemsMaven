@@ -108,14 +108,11 @@ public class Parser {
 
     public static void changeAvailableAmount(String filePath, String productName, int newAmount) throws IOException {
         String jsonString = new String(Files.readAllBytes(Paths.get(filePath)));
-        // Find the product entry and modify its Available Amount
         String regex = "(\"ProductName\"\\s*:\\s*\"" + Pattern.quote(productName) + "\"\\s*,\\s*[^}]*?\"Available Amount\"\\s*:\\s*)\\d+";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(jsonString);
         if (matcher.find()) {
-            // Replace the old Available Amount with the new value
             String updatedJson = matcher.replaceFirst(matcher.group(1) + newAmount);
-            // Write back to file
             try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath))) {
                 writer.write(updatedJson);
             }
@@ -125,7 +122,6 @@ public class Parser {
     public static void decreaseAvailableAmount(String filePath, String productName) throws IOException {
         String jsonString = new String(Files.readAllBytes(Paths.get(filePath)));
 
-        // Find the product entry and modify its Available Amount
         String regex = "(\"ProductName\"\\s*:\\s*\"" + Pattern.quote(productName) + "\"\\s*,\\s*[^}]*?\"Available Amount\"\\s*:\\s*)(\\d+)";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(jsonString);
@@ -136,7 +132,6 @@ public class Parser {
                 int newAmount = currentAmount - 1;
                 String updatedJson = matcher.replaceFirst(matcher.group(1) + newAmount);
 
-                // Write back to file
                 try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filePath))) {
                     writer.write(updatedJson);
                 }

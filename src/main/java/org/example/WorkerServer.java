@@ -115,9 +115,9 @@ public class WorkerServer {
                     } else if (message.startsWith("neworder::")) {
                         String[] parts = message.split("::");
                         System.out.println("madeit");
-                        for (Store store : nearbyStores.get(senderID)) {
+                        for (Store store : myStores) {
                             if (store.storeID == Integer.parseInt(parts[1]))
-                            {synchronized (nearbyStores) {
+                            {synchronized (myStores) {
                                     for (int i = 2;i <= parts.length - 1;i+=2){
                                         store.registerSale(parts[i], Integer.parseInt(parts[i+1]));
                                         System.out.println("Sold: " + parts[i] + Integer.parseInt(parts[i+1]) );}
