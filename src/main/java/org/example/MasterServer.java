@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class MasterServer {
-    private Map<Integer, ClientConnection> clientConnections = new ConcurrentHashMap<>();
+    private Map<String, ClientConnection> clientConnections = new ConcurrentHashMap<>();
     private int clientCounter = 0;
 
     public static class ClientConnection {
@@ -41,23 +41,24 @@ public class MasterServer {
             out.flush();
             ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
             
-            int clientKey = getNextClientKey();
-            clientConnections.put(clientKey, new ClientConnection(socket, out, in));
-            System.out.println("New client connected with key: " + clientKey);
+            int clientKey = getNextclientKey();
+            String clientIP = socket.getInetAddress().getHostAddress();
+            clientConnections.put(clientIP, new ClientConnection(socket, out, in));
+            System.out.println("New client connected with key: " + clientIP);
             
-            handleClient(clientKey);
+            handleClient(clientIP);
 
         } catch (IOException e) {
             System.out.println("Error setting up client connection: " + e.getMessage());
         }
     }
 
-    private synchronized int getNextClientKey() {
+    private synchronized int getNextclientKey() {
         return ++clientCounter;
     }
 
-    private void handleClient(int clientKey) {
-        ClientConnection clientConn = clientConnections.get(clientKey);
+    private void handleClient(String clientIP) {
+        ClientConnection clientConn = clientConnections.get(clientIP);
         if (clientConn == null) return;
 
         try {
@@ -68,31 +69,31 @@ public class MasterServer {
             Object received;
             while ((received = in.readObject()) != null) {
                 if (received instanceof Map.Entry) {
-                    int targetKey = (Integer) ((Map.Entry<?, ?>) received).getKey();
-                    ClientConnection targetConn = clientConnections.get(targetKey);
+                    String targetIP = (String) ((Map.Entry<?, ?>) received).getKey();
+                    ClientConnection targetConn = clientConnections.get(targetIP);
                     if (targetConn != null && !targetConn.socket.isClosed()) {
-                        ActionsForMaster actionThread = new ActionsForMaster(received, targetConn, targetKey);
+                        ActionsForMaster actionThread = new ActionsForMaster(received, targetConn, targetIP);
                         actionThread.start();
                     } else {
-                        System.out.println("No connection found for key " + targetKey);
+                        System.out.println("No connection found for key " + targetIP);
                     }
                 } else if (received instanceof String) {
-                    System.out.println("Client " + clientKey + " sent String: " + received);
+                    System.out.println("Client " + clientIP + " sent String: " + received);
 
-                    ActionsForMaster actionThread = new ActionsForMaster(received, clientConn, clientKey);
+                    ActionsForMaster actionThread = new ActionsForMaster(received, clientConn, clientIP);
                     actionThread.start();
                 } else if (received instanceof Store) {
-                    System.out.println("Client " + clientKey + " sent Store object");
+                    System.out.println("Client " + clientIP + " sent Store object");
 
-                    ActionsForMaster actionThread = new ActionsForMaster(received, clientConn, clientKey);
+                    ActionsForMaster actionThread = new ActionsForMaster(received, clientConn, clientIP);
                     actionThread.start();
                 } else {
-                    System.out.println("Unknown object received from client " + clientKey);
+                    System.out.println("Unknown object received from client " + clientIP);
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Client " + clientKey + " disconnected or error: " + e.getMessage());
-            clientConnections.remove(clientKey);
+            System.out.println("Client " + clientIP + " disconnected or error: " + e.getMessage());
+            clientConnections.remove(clientIP);
             try {
                 clientConn.socket.close();
             } catch (IOException ignored) {}

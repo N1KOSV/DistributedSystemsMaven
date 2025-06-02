@@ -10,7 +10,7 @@ import java.util.Map;
 class ActionsForWorker extends Thread {
     static List<Store> myStores;
     static String command = "";
-    Map.Entry<Integer, String> kvp;
+    Map.Entry<String, String> kvp;
     
     public ActionsForWorker(List<Store> myStores) {this.myStores = myStores;}
     
@@ -41,7 +41,7 @@ class ActionsForWorker extends Thread {
                 System.out.println(kvp.getKey() + " " + kvp.getValue());
                 if (kvp.getValue().equals("send")){Socket reducerSocket = new Socket("127.0.0.2", 5002);
                     ObjectOutputStream reducerOut = new ObjectOutputStream(reducerSocket.getOutputStream());
-                    Map.Entry<Integer, List<Store> > response = new AbstractMap.SimpleEntry<>(kvp.getKey(), myStores);
+                    Map.Entry<String, List<Store> > response = new AbstractMap.SimpleEntry<>(kvp.getKey(), myStores);
                     if (myStores != null) {printStores();}
                     reducerOut.writeObject(response);
                     reducerOut.flush();

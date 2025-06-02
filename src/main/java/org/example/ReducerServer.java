@@ -21,7 +21,6 @@ public class ReducerServer {
             while (true) {
                 Socket socket = serverSocket.accept();
                 mssgsReceived++;
-                System.out.println("Reducer connected " + socket.getInetAddress());
 
                 Thread m = new ActionsForReducer(socket);
                 m.start();

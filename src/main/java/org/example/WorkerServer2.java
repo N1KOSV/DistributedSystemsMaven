@@ -9,7 +9,7 @@ import java.util.*;
 public class WorkerServer2 {
 
     static List<Store> myStores = new ArrayList<>();
-    private Map<Integer, List<Store>> nearbyStores = new HashMap();
+    private Map<String, List<Store>> nearbyStores = new HashMap();
     int number = 0;
     Double longitude = 0.0;
     Double latitude = 0.0;
@@ -41,9 +41,9 @@ public class WorkerServer2 {
                     for(Store store1 : myStores) {if (store.storeID == store1.storeID) {alreadyExists = true;}}
                     if (!alreadyExists) {myStores.add(store);}
                 } else if (received instanceof Map.Entry) {
-                    Map.Entry<Integer, String> kvp = (Map.Entry<Integer, String>) received;
+                    Map.Entry<String, String> kvp = (Map.Entry<String, String>) received;
                     String message = kvp.getValue();
-                    int senderID = kvp.getKey();
+                    String senderID = kvp.getKey();
                     if (message.startsWith("Lat::")){latitude = Double.parseDouble(message.substring(5));}
                     else if (message.startsWith("Lon::")) {
                         longitude = Double.parseDouble(message.substring(5));
@@ -82,6 +82,7 @@ public class WorkerServer2 {
                                 for (Product p : store.products) {System.out.println(p.getName() + " " + p.getAmount());}}
                         }
                     } else if (message.startsWith("categories::")) {
+                        Thread.sleep(400);
                         Map<String, List<String>> result = new HashMap<>();
                         String[] parts = message.split("::");
                         for (int i = 0; i < parts.length - 1; i += 2) {
@@ -97,10 +98,21 @@ public class WorkerServer2 {
                             if (!result.get("categories").contains(s.foodCategory) || !result.get("prices").contains(s.getAvgPrice()) || Double.parseDouble(Collections.max(result.get("ratings"))) > s.stars) {
                                 synchronized (nearbyStores) {
                                     nearbyStores.get(senderID).remove(s);
+                                    if (nearbyStores.get(senderID).size() == 0) {
+                                        System.out.println(nearbyStores.get(senderID).size());
+                                        new ActionsForWorker(nearbyStores.get(senderID), kvp).start();
+                                        break;
+                                    }
+                                if (!nearbyStores.get(senderID).isEmpty()) {
+                                    new ActionsForWorker(nearbyStores.get(senderID), kvp).start();
+                                    for (Store s2 : nearbyStores.get(senderID)) {
+                                        System.out.println(s2.toString());
+                                    }
                                 }
+
                             }
                         }
-                        new ActionsForWorker(nearbyStores.get(senderID), kvp).start();
+                    }
                     } else if (message.startsWith("neworder::")) {
                         String[] parts = message.split("::");
                         for (Store store : myStores) {
@@ -117,6 +129,8 @@ public class WorkerServer2 {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 

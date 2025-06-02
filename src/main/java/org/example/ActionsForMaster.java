@@ -11,9 +11,9 @@ public class ActionsForMaster extends Thread {
 
     private final Object receivedObject;
     private final MasterServer.ClientConnection clientConn;
-    private final int clientKey;
+    private final String clientKey;
 
-    public ActionsForMaster(Object receivedObject, MasterServer.ClientConnection clientConn, int clientKey) {
+    public ActionsForMaster(Object receivedObject, MasterServer.ClientConnection clientConn, String clientKey) {
         this.receivedObject = receivedObject;
         this.clientConn = clientConn;
         this.clientKey = clientKey;
@@ -44,7 +44,7 @@ public class ActionsForMaster extends Thread {
                 String receivedOrder = (String) receivedObject;
                 System.out.println(clientKey + " Has ordered " + receivedOrder);
 
-                Map.Entry<Integer, String> kvp = new AbstractMap.SimpleEntry<>(clientKey, receivedOrder);
+                Map.Entry<String, String> kvp = new AbstractMap.SimpleEntry<>(clientKey, receivedOrder);
 
                 String ip = "127.0.0.1";
                 int[] ports = {5014, 5015, 5016};
